@@ -55,8 +55,8 @@ class Template(unittest.TestCase):
 
 class Outputs(unittest.TestCase):
     def test_committed_files_equal_a_fresh_rebuild(self):
-        _, files = built()
-        self.assertEqual(len(files), 12)
+        findings, files = built()
+        self.assertEqual(len(files), 13 if findings["partners"]["available"] else 12)
         for path, content in files.items():
             self.assertTrue((ROOT / path).exists(), f"{path} is missing; run python3 -m cwc rebuild")
             self.assertEqual((ROOT / path).read_bytes(), content, f"{path} differs from a fresh rebuild")

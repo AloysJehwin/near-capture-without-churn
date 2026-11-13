@@ -35,8 +35,8 @@ The sample
 
 Output
     explorer_sample.json: one record per request with the time it covers, the
-    number of swaps, and per partner app the number of swaps, the USD value and
-    the fees the app charged.
+    number of swaps, and per partner app the number of swaps, the USD value,
+    the fees the app charged and the accounts those fees are paid to.
 
 Standard library only. Works with Python 3.8 or later.
 """
@@ -211,6 +211,7 @@ def summarise(swaps: list, end_unix: int) -> dict:
     stamps = [int(to_float(s.get("createdAtTimestamp"))) for s in swaps if s.get("createdAtTimestamp") is not None]
     referrals: dict = {}
     recipients: dict = {}
+    split: dict = {}
     deposit_types: dict = {}
     recipient_types: dict = {}
     total_usd = 0.0
@@ -230,6 +231,9 @@ def summarise(swaps: list, end_unix: int) -> dict:
             fee_bps += bps
             who = str(fee.get("recipient") or "(unknown)").strip().lower()
             entry = recipients.setdefault(who, [0, 0.0])
+            entry[0] += 1
+            entry[1] += bps * usd
+            entry = split.setdefault(name, {}).setdefault(who, [0, 0.0])
             entry[0] += 1
             entry[1] += bps * usd
         entry = referrals.setdefault(name, [0, 0.0, 0.0, 0.0, 0])
@@ -260,6 +264,8 @@ def summarise(swaps: list, end_unix: int) -> dict:
         "recipient_types": recipient_types,
         "referrals": {k: [v[0], round(v[1], 2), round(v[2], 2), round(v[3], 2), v[4]] for k, v in sorted(referrals.items())},
         "fee_recipients": {k: [v[0], round(v[1], 2)] for k, v in sorted(recipients.items())},
+        # for each partner app, the accounts its app fees are paid to
+        "referral_fee_recipients": {r: {k: [v[0], round(v[1], 2)] for k, v in sorted(who.items())} for r, who in sorted(split.items())},
     }
 
 
@@ -291,23 +297,25 @@ def save(path: pathlib.Path, payload: dict) -> None:
 
 def write_output(path: pathlib.Path, progress: dict, args, hours: list, started: str) -> None:
     blocks = [progress["blocks"][key] for key in sorted(progress["blocks"], key=int)]
+    hours_done = sorted({dt.datetime.fromtimestamp(b["end_unix"], UTC).hour for b in blocks})
+    days_done = sorted({dt.datetime.fromtimestamp(b["end_unix"], UTC).strftime("%Y-%m-%d") for b in blocks})
     payload = {
         "source": "NEAR Intents Explorer API, GET /api/v0/transactions (partner token required; the token is not stored)",
         "what": "Totals per partner app (referral) from a fixed sample of successful swaps. No sender, recipient, deposit address, hash or single swap is stored.",
         "design": {
-            "first_day": args.first_day,
-            "last_day": args.last_day,
-            "hours_utc": hours,
+            "first_day": days_done[0] if days_done else args.first_day,
+            "last_day": days_done[-1] if days_done else args.last_day,
+            "hours_utc": hours_done,
             "block_seconds": BLOCK_SECONDS,
             "page_size": PAGE_SIZE,
             "statuses": "SUCCESS",
             "cap_usd": CAP_USD,
             "referral_fields": ["swaps", "usd", "usd_capped", "fee_bps_times_usd", "swaps_with_app_fee"],
             "fee_recipient_fields": ["fee_entries", "fee_bps_times_usd"],
+            "referral_fee_recipients": "per partner app and fee account: [fee_entries, fee_bps_times_usd]; present in blocks sampled with version 2 of this script",
         },
         "sampled_from_utc": started,
         "sampled_to_utc": dt.datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "blocks_planned": len(plan(dt.date.fromisoformat(args.first_day), dt.date.fromisoformat(args.last_day), hours)),
         "blocks_done": len(blocks),
         "blocks_failed": sorted(progress.get("failed", [])),
         "blocks": blocks,
@@ -340,6 +348,7 @@ def main() -> int:
     parser.add_argument("--last-day", default="2026-11-08", help="last UTC day to sample (default 2026-11-08)")
     parser.add_argument("--hours", default="0,8,16", help="UTC hours at which a block ends (default 0,8,16)")
     parser.add_argument("--out", default="explorer_sample.json", help="output file (default explorer_sample.json)")
+    parser.add_argument("--max-seconds", type=float, default=0.0, help="stop cleanly after this many seconds and save; run again to continue (default: no limit)")
     args = parser.parse_args()
     try:
         client = Client(read_token())
@@ -361,6 +370,9 @@ def main() -> int:
         t0 = time.monotonic()
         try:
             for end in todo:
+                if args.max_seconds and time.monotonic() - t0 > args.max_seconds - 2 * MIN_GAP_SECONDS:
+                    print(f"Time limit reached after {done_now} requests. Run the same command again to continue.")
+                    break
                 swaps = client.get({
                     "numberOfTransactions": PAGE_SIZE,
                     "statuses": "SUCCESS",
@@ -375,8 +387,9 @@ def main() -> int:
                     if end in progress["failed"]:
                         progress["failed"].remove(end)
                 done_now += 1
-                if done_now % 10 == 0 or done_now == len(todo):
+                if done_now % 10 == 0 or done_now == len(todo) or args.max_seconds:
                     save(progress_path, progress)
+                if done_now % 10 == 0 or done_now == len(todo):
                     left = (len(todo) - done_now) * (time.monotonic() - t0) / done_now / 60.0
                     stamp = dt.datetime.fromtimestamp(end, UTC).strftime("%Y-%m-%d %H:%M")
                     print(f"  {done_now}/{len(todo)} done, block ending {stamp} UTC, about {left:.0f} minutes left", flush=True)

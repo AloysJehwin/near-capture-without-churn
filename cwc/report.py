@@ -237,7 +237,128 @@ def facts(f: dict) -> dict:
         "manifest_sha": f["meta"]["manifest_sha256"][:16], "config_sha": f["meta"]["analysis_config_sha256"][:16],
     }
     out.update(tables(f))
+    out.update({k: v for k, v in partner_facts(f).items() if isinstance(v, str)})
     return out
+
+
+def listed(names: list) -> str:
+    if not names:
+        return "none"
+    if len(names) == 1:
+        return names[0]
+    return ", ".join(names[:-1]) + " and " + names[-1]
+
+
+def ratio(value, digits: int = 2) -> str:
+    return "n/a" if value is None else n(value, digits) + "x"
+
+
+def partner_facts(f: dict) -> dict:
+    """Everything the texts say about single partner apps. All of it is generated, because all of it depends on the sample."""
+    p = f["partners"]
+    if not p["available"]:
+        return {
+            "partners_available": "",
+            "partner_section": ("This copy of the repository has no sample of NEAR's swap records, so there is nothing to report here. "
+                                "`scripts/explorer_sample.py` takes one. It needs a partner key for NEAR's Explorer API."),
+            "partner_gap_bullet": ("**Which partners stayed.** Total volume can hold up while individual partners leave and others arrive. "
+                                   "That needs swap-level data from NEAR's Explorer API, which requires a partner key."),
+            "partner_verdict_note": ("Partner-level evidence would also change it. If the largest partners from before the switch stopped sending swaps "
+                                     "while new ones filled the gap, \"without churn\" would be the wrong name for what happened."),
+            "partner_method_bullet": "**Partner sample.** None in this copy of the repository.",
+            "partner_against_items": [],
+            "partner_readme_rows": [],
+        }
+    w = p["windows"]
+    b, a, l = w["before"], w["after"], w["latest"]
+    ca, cl = f["changes"]["after_vs_before"], f["changes"]["latest_vs_before"]
+    top = p["top_count"]
+    cents = lambda bps: n(bps, 1)
+    hours = listed([f"{h:02d}:00" for h in p["hours_utc"]])
+    se_after = p["top_after_over_before_se_log"]
+    se_text = f"about {pct(100 * (2.718281828459045 ** se_after - 1), 0)} either way" if se_after is not None else "not available"
+    gone, halved = p["top_gone_after"], p["top_halved_after"]
+    gone_latest = p["top_gone_latest"]
+    gone_limit = share(p["gone_below"], 0)
+    table_rows = []
+    for r in p["top_partners"]:
+        fee_cell = lambda cell: "n/a" if cell["app_fee_bps"] is None else cents(cell["app_fee_bps"])
+        table_rows.append([r["name"], share(r["share_of_partner_volume_before"], 1), usd(r["before"]["usd_per_day"]), usd(r["after"]["usd_per_day"]),
+                           usd(r["latest"]["usd_per_day"]), ratio(r["after_over_before"]), ratio(r["latest_over_before"]),
+                           f"{fee_cell(r['before'])}, {fee_cell(r['after'])}, {fee_cell(r['latest'])}"])
+    partner_table = table(["Partner app", "Share of partner volume before", "Per day before", "Per day after", "Per day latest",
+                           "After against before", "Latest against before", "App fee per $100 (cents): before, after, latest"], table_rows)
+    if p["top_still_sending_latest"] == top:
+        still = f"All {top} still appear in the sample in the latest window."
+    else:
+        still = f"{p['top_still_sending_latest']} of the {top} still appear in the sample in the latest window."
+    if a["partner_app_fee_bps"] <= 1.05 * b["partner_app_fee_bps"]:
+        fee_read = "Partners did not raise the fee they charge to make up for NEAR's share."
+    else:
+        fee_read = "Partners charged more after the switch."
+    for_items = [
+        f"The {top} largest partners together sent {ratio(p['top_after_over_before'])} their earlier volume per day after the switch and {ratio(p['top_latest_over_before'])} in the latest window. "
+        f"NEAR Intents as a whole, in DefiLlama's data, was {ratio(ca['volume_ratio'])} and {ratio(cl['volume_ratio'])}; the peers together were {ratio(ca['peers_volume_ratio'])} and {ratio(cl['peers_volume_ratio'])}.",
+        still,
+        f"Partner apps sent {share(b['volume_share']['partner'], 0)} of the sampled volume before the switch, {share(a['volume_share']['partner'], 0)} after and {share(l['volume_share']['partner'], 0)} in the latest window.",
+        f"Partner apps that do not appear in the sample before the switch sent {share(p['new_partner_share_of_partner_volume_latest'], 0)} of partner volume in the latest window.",
+        f"The app fee partners charged was {cents(b['partner_app_fee_bps'])} cents per $100 before, {cents(a['partner_app_fee_bps'])} after and {cents(l['partner_app_fee_bps'])} latest. {fee_read}",
+    ]
+    against_items = []
+    if gone or halved:
+        against_items.append(
+            f"**Some partners did leave.** Of the {top} largest before the switch, {len(halved)} sent less than half their earlier volume after it ({listed(halved)}), "
+            f"and {len(gone)} of those less than {gone_limit} ({listed(gone)}). In the latest window {len(gone_latest)} {'is' if len(gone_latest) == 1 else 'are'} below {gone_limit} ({listed(gone_latest)}). "
+            "The sample cannot say why a partner sent less.")
+    if p["top_after_over_before"] is not None and p["top_after_over_before"] < 1:
+        against_items.append(
+            f"**The largest partners sent less after the switch.** {ratio(p['top_after_over_before'])} their earlier volume per day, with a sampling error of {se_text}. "
+            f"NEAR Intents as a whole was {ratio(ca['volume_ratio'])} over the same weeks, so the partners did no worse than the total, but the total fell.")
+    against_items.append(
+        f"**The sample is not the whole of NEAR Intents.** It holds swaps made through the 1Click service, about {share(b['share_of_defillama_volume'], 0)} of DefiLlama's volume before the switch, "
+        f"{share(a['share_of_defillama_volume'], 0)} after and {share(l['share_of_defillama_volume'], 0)} latest. It is taken at fixed hours ({hours} UTC), not all day. The partner name is the one the app declares.")
+    against_items.append(
+        f"**Most app fees in the sample are still addressed to the partner.** Of the app fees declared in the sampled swaps, {share(b['fee_share_to_near_partner_share_wallets'], 1)} named NEAR's fee-share wallets as the receiver before the switch, "
+        f"{share(a['fee_share_to_near_partner_share_wallets'], 1)} after and {share(l['fee_share_to_near_partner_share_wallets'], 1)} latest. NEAR's documentation gives 50/50 as the default split. "
+        "The field shows where a swap's app fee is addressed. It does not show what NEAR collects in other ways, so it is not a measure of the split.")
+    body = "\n\n".join([
+        f"DefiLlama gives totals. NEAR's Explorer API lists single swaps and names the partner app that sent each one. It needs a partner key, so this repository stores a sample taken with one: "
+        f"{p['swaps']:,} successful swaps in {p['blocks']} blocks, each block up to 1,000 swaps in a row ending at a fixed hour ({hours} UTC) on each day from {p['first_day']} to {p['last_day']}. "
+        "Only totals per partner app are stored. No user address and no single swap is stored. This evidence stands beside the rules in section 7; it does not enter the verdict.",
+        partner_table,
+        "Volume per day is the dollars in a window's blocks divided by the time those blocks span.",
+        "![The largest partner apps before the fee switch, in three windows](docs/charts/partners.svg)",
+        "**What it shows for the thesis**",
+        "\n".join("* " + item for item in for_items),
+        "**What it shows against**",
+        "\n".join("* " + item for item in against_items),
+    ])
+    return {
+        "partners_available": "yes",
+        "partner_section": body,
+        "partner_gap_bullet": "**Why a partner sent less.** Section 5 shows which partner apps sent less after the switch. It cannot show whether the fee switch was the reason.",
+        "partner_verdict_note": (
+            "Partner-level evidence is in section 5. It is not part of the rules, because it is a sample that others cannot retake without a key. "
+            f"If the largest partners from before the switch had stopped sending swaps while new ones filled the gap, \"without churn\" would be the wrong name for what happened. "
+            f"In the sample the {top} largest together sent {ratio(p['top_after_over_before'])} their earlier volume after the switch and {ratio(p['top_latest_over_before'])} latest, and {len(gone)} of them fell below {gone_limit}."),
+        "partner_method_bullet": (
+            f"**Partner sample.** `scripts/explorer_sample.py` asks NEAR's Explorer API for up to 1,000 successful swaps that end at each of the hours {hours} UTC on every day, and keeps totals per partner app and per fee account. "
+            "The files are in `data/explorer/` with their SHA-256 in `data/explorer/MANIFEST.json`, and the rebuild stops if one does not match. Taking a new sample needs a partner key; rebuilding from the stored one does not. "
+            f"NEAR's own apps are told apart from partners by {p['own_front_end_rule']}: {listed(['`' + name + '`' for name in p['own_front_end_referrals']])}. "
+            f"The sampling error quoted for the largest partners comes from leaving out one day at a time."),
+        "partner_against_items": against_items,
+        "partner_for_items": for_items,
+        "partner_table": partner_table,
+        "partner_readme_rows": [
+            f"| The {top} largest partner apps before the switch: volume per day after, and latest (sample of NEAR's swap records) | {ratio(p['top_after_over_before'])}, {ratio(p['top_latest_over_before'])} |",
+            f"| Of those {top}, below {gone_limit} of their earlier volume after the switch | {len(gone)} ({listed(gone)}) |",
+        ],
+        "partner_top_after": ratio(p["top_after_over_before"]), "partner_top_latest": ratio(p["top_latest_over_before"]),
+        "partner_top_count": str(top), "partner_gone_count": str(len(gone)), "partner_gone_names": listed(gone),
+        "partner_swaps": f"{p['swaps']:,}", "partner_blocks": str(p["blocks"]), "partner_hours": hours,
+        "partner_first_day": p["first_day"], "partner_last_day": p["last_day"],
+        "partner_coverage_before": share(b["share_of_defillama_volume"], 0),
+    }
 
 
 def table(header: list, rows: list) -> str:
@@ -322,6 +443,7 @@ def readme_block(f: dict) -> str:
         f"| NEAR Intents' share of the peer basket: before, after, latest | {v['share_before']}, {v['share_after']}, {v['share_latest']} |",
         f"| Share of fees NEAR kept in the latest {v['latest_weeks']} weeks | {v['capture_latest']} ({v['capture_ratio_latest']}x the level before) |",
         f"| Clean specifications run | {v['curve_clean']} (median {v['curve_median']}, range {v['curve_min']} to {v['curve_max']}) |",
+        *partner_facts(f)["partner_readme_rows"],
         "",
         "![Volume change against peers with the break-even loss](docs/charts/ruler.svg)",
         "",

@@ -1,0 +1,14 @@
+{
+ "files": [
+  {
+   "blocks": 1050,
+   "blocks_failed": 0,
+   "bytes": 3352693,
+   "file": "explorer_sample.json",
+   "sampled_from_utc": "2026-11-13T18:43:46Z",
+   "sampled_to_utc": "2026-11-13T20:18:15Z",
+   "sha256": "809349ffbb992d43462187d74b3447a4fd82c4b22c0f0b12850356a8defcc3be"
+  }
+ ],
+ "source": "NEAR Intents Explorer API, GET /api/v0/transactions (successful swaps made through the 1Click service)"
+}

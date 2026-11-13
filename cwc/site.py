@@ -59,6 +59,9 @@ tr:last-child td{border-bottom:0}
 ol.against{padding-left:22px;max-width:74ch}
 ol.against li{margin:0 0 12px}
 ol.against b{font-weight:600}
+ul.notes{padding-left:20px;max-width:78ch;margin:18px 0 0}
+ul.notes li{margin:0 0 10px}
+ul.notes b{font-weight:600}
 footer{margin:64px 0 0;padding:26px 0 44px;border-top:1px solid var(--rule);font-size:14px;color:var(--ink2)}
 #tip{position:fixed;z-index:9;max-width:340px;background:var(--deep);color:var(--ivory);font-size:13px;line-height:1.4;padding:7px 10px;border-radius:4px;pointer-events:none}
 .note{background:var(--ivory);border-left:4px solid var(--crimson);padding:12px 16px;margin:0 0 18px;max-width:74ch}
@@ -144,8 +147,26 @@ def render(f: dict) -> str:
         f"<b>Volume did fall in dollars.</b> NEAR Intents volume {v['volume_moved_after']} after the switch. The peers together {v['peers_moved_after']}.",
         f"<b>The later rise has no test of its own.</b> The share of fees NEAR keeps went from {v['capture_after']} to {v['capture_latest']} after the test window, with no dated change to test.",
         "<b>The rules were written after a first look at the data.</b> No out-of-sample test exists yet; the dated check below is the only one.",
-        "<b>Total volume cannot show which partners stayed.</b> That needs swap-level data from NEAR's Explorer API.",
     ]
+    pf = report.partner_facts(f)
+    bold = lambda text: re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", html.escape(text, quote=False))
+    if pf["partners_available"]:
+        against += [bold(item) for item in pf["partner_against_items"][:2]]
+    else:
+        against.append("<b>Total volume cannot show which partners stayed.</b> That needs swap-level data from NEAR's Explorer API.")
+    partner_block = []
+    if pf["partners_available"]:
+        pv = f["partners"]
+        partner_block = [
+            f'<section><h2>The {e(pf["partner_top_count"])} largest partner apps sent {e(pf["partner_top_after"])} their earlier volume after the switch, and {e(pf["partner_top_latest"])} now</h2>',
+            f'<p class="lede">Totals can hold while single partners leave. NEAR\'s own swap records name the partner app behind each swap. This is a sample of {e(pf["partner_swaps"])} of them, taken at fixed hours on every day, '
+            f'covering the part of NEAR Intents that runs through its 1Click service (about {e(pf["partner_coverage_before"])} of volume before the switch). '
+            f'{e(pf["partner_gone_count"])} of the {e(pf["partner_top_count"])} fell below a tenth of their earlier volume: {e(pf["partner_gone_names"])}.</p>',
+            figure(ch["partners"], "Dollars in each window's sampled blocks divided by the time those blocks span. Taken with a partner key; stored as totals per partner app.",
+                   f'Source: <a href="https://explorer.near-intents.org/api/v0/transactions">NEAR Intents Explorer API</a>, sample fingerprint {html.escape(pv["files"][0]["sha256"][:12])}.'),
+            '<ul class="notes">' + "".join(f"<li>{minus(bold(item))}</li>" for item in pf["partner_for_items"] + pf["partner_against_items"][2:]) + "</ul>",
+            "</section>",
+        ]
     snapshot_rows = "".join(
         f"<tr><td>{e(s['name'])}</td><td>{e(s['measure'].replace('_', ' '))}</td><td>{e(s['role'])}</td>"
         f"<td>{e(s['first_day'] or '')} to {e(s['last_day'] or '')}</td><td>{e(s['fetched_at_utc'])}</td>"
@@ -219,6 +240,8 @@ def render(f: dict) -> str:
         figure(ch["share"], "Plain sums of daily volume. A day on which a peer reports nothing counts as zero for that peer.",
                sources(f, ["near_intents_volume"] + peer_keys)),
         "</section>",
+
+        *partner_block,
 
         '<section><h2>What counts against the thesis</h2><ol class="against">' + "".join(f"<li>{minus(item)}</li>" for item in against) + "</ol></section>",
 

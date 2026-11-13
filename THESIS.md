@@ -10,7 +10,7 @@ Every figure in this file is written by `python3 -m cwc rebuild` from a committe
 
 NEAR Intents swaps one crypto asset for another across blockchains. Wallets and apps (called partners here) send their users' swaps to it and add a fee on top. The user pays that fee. Until early 2026 NEAR earned little from partners' swaps: in the 13 weeks before the change, its share of partner fees, together with smaller items, came to 1.02% of all fees paid, and 87% of NEAR's revenue from Intents came from its own app.
 
-In late February 2026 NEAR turned on what it calls the fee switch: an automatic split of partner fees between the partner and NEAR. NEAR's documentation gives the default split as 50/50, with other terms possible by agreement. NEAR uses its part to buy NEAR tokens on the open market. This file dates the switch to 23 February 2026; section 7 says why.
+In late February 2026 NEAR turned on what it calls the fee switch: an automatic split of partner fees between the partner and NEAR. NEAR's documentation gives the default split as 50/50, with other terms possible by agreement. NEAR uses its part to buy NEAR tokens on the open market. This file dates the switch to 23 February 2026; section 8 says why.
 
 A partner that has to hand over half of its fee has three choices:
 
@@ -104,17 +104,53 @@ The formal test builds a weighted basket of the 7 peers that tracked NEAR Intent
 
 **4.8 The later rise has no test of its own.** NEAR's share of fees went from 11.89% in the test window to 27.10% in the latest one. No dated change is documented for that, so there is no before and after to compare. Longer windows are not a substitute. A peer's outage sends its users elsewhere, so a window that includes one is biased. The 171 specifications of that kind have a median of +11.9%. They are shown but do not count.
 
-**4.9 The rules were written after a first look at the data.** The thresholds are in `config/analysis.json`, and its hash is in `out/findings.json`, but they were chosen after an exploratory run on the same data. No out-of-sample test exists yet. The only one is the dated check in section 6.
+**4.9 The rules were written after a first look at the data.** The thresholds are in `config/analysis.json`, and its hash is in `out/findings.json`, but they were chosen after an exploratory run on the same data. No out-of-sample test exists yet. The only one is the dated check in section 7.
 
-## 5. What these data cannot show
+## 5. Partner by partner, from NEAR's own swap records
 
-* **Which partners stayed.** Total volume can hold up while individual partners leave and others arrive. That needs swap-level data from NEAR's Explorer API, which requires a partner key.
+DefiLlama gives totals. NEAR's Explorer API lists single swaps and names the partner app that sent each one. It needs a partner key, so this repository stores a sample taken with one: 1,048,000 successful swaps in 1050 blocks, each block up to 1,000 swaps in a row ending at a fixed hour (00:00, 08:00 and 16:00 UTC) on each day from 2025-11-23 to 2026-11-08. Only totals per partner app are stored. No user address and no single swap is stored. This evidence stands beside the rules in section 7; it does not enter the verdict.
+
+| Partner app | Share of partner volume before | Per day before | Per day after | Per day latest | After against before | Latest against before | App fee per $100 (cents): before, after, latest |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| swapkit | 52.7% | $9.8M | $10.6M | $13.3M | 1.09x | 1.37x | 92.2, 76.6, 80.1 |
+| rango | 16.1% | $3.0M | $2.6M | $2.8M | 0.86x | 0.95x | 1.1, 4.0, 16.7 |
+| zashi / zodl | 13.0% | $2.4M | $1.2M | $2.4M | 0.49x | 1.00x | 53.3, 65.1, 67.0 |
+| infinex.near | 3.7% | $681.1K | $40.7K | $28.4K | 0.06x | 0.04x | 0.0, 0.0, 16.1 |
+| lifi | 3.4% | $625.7K | $1.4M | $3.3M | 2.18x | 5.30x | 0.0, 4.7, 5.8 |
+| rhea | 1.7% | $309.8K | $10.7K | $160.1K | 0.03x | 0.52x | 6.2, 12.5, 2.6 |
+| stableflow | 1.7% | $309.2K | $202.7K | $395.3K | 0.66x | 1.28x | 0.0, 1.0, 1.9 |
+| meru | 1.6% | $295.3K | $310.3K | $39.2K | 1.05x | 0.13x | 0.0, 0.0, 0.5 |
+| solswap.intents-referral.near | 0.9% | $173.3K | $70.8K | $22.4K | 0.41x | 0.13x | 20.8, 27.0, 15.0 |
+| cow | 0.9% | $170.1K | $226.0K | $319.4K | 1.33x | 1.88x | 0.0, 0.0, 1.0 |
+
+Volume per day is the dollars in a window's blocks divided by the time those blocks span.
+
+![The largest partner apps before the fee switch, in three windows](docs/charts/partners.svg)
+
+**What it shows for the thesis**
+
+* The 10 largest partners together sent 0.94x their earlier volume per day after the switch and 1.29x in the latest window. NEAR Intents as a whole, in DefiLlama's data, was 0.82x and 1.67x; the peers together were 0.83x and 1.73x.
+* All 10 still appear in the sample in the latest window.
+* Partner apps sent 78% of the sampled volume before the switch, 75% after and 76% in the latest window.
+* Partner apps that do not appear in the sample before the switch sent 10% of partner volume in the latest window.
+* The app fee partners charged was 57.3 cents per $100 before, 52.9 after and 53.6 latest. Partners did not raise the fee they charge to make up for NEAR's share.
+
+**What it shows against**
+
+* **Some partners did leave.** Of the 10 largest before the switch, 4 sent less than half their earlier volume after it (zashi / zodl, infinex.near, rhea and solswap.intents-referral.near), and 2 of those less than 10% (infinex.near and rhea). In the latest window 1 is below 10% (infinex.near). The sample cannot say why a partner sent less.
+* **The largest partners sent less after the switch.** 0.94x their earlier volume per day, with a sampling error of about 8% either way. NEAR Intents as a whole was 0.82x over the same weeks, so the partners did no worse than the total, but the total fell.
+* **The sample is not the whole of NEAR Intents.** It holds swaps made through the 1Click service, about 30% of DefiLlama's volume before the switch, 36% after and 27% latest. It is taken at fixed hours (00:00, 08:00 and 16:00 UTC), not all day. The partner name is the one the app declares.
+* **Most app fees in the sample are still addressed to the partner.** Of the app fees declared in the sampled swaps, 0.8% named NEAR's fee-share wallets as the receiver before the switch, 5.9% after and 6.9% latest. NEAR's documentation gives 50/50 as the default split. The field shows where a swap's app fee is addressed. It does not show what NEAR collects in other ways, so it is not a measure of the split.
+
+## 6. What these data cannot show
+
+* **Why a partner sent less.** Section 5 shows which partner apps sent less after the switch. It cannot show whether the fee switch was the reason.
 * **Cause.** Other things happened in the same week: NEAR announced new products together with the fee switch (press release of 25 February 2026). The test measures what happened to volume, not why.
 * **Whether the money was new.** Before 2026-01-31 DefiLlama records almost no revenue from partner fees. If NEAR was owed such revenue earlier and only started moving it then, the rise in the cut is overstated.
 * **One short stretch of front-end revenue.** Front-end transfers are recorded daily only from 2026-04-27. Before that there were 14 transfers, and the correction in section 2 assumes each one was earned evenly, in proportion to fees, since the one before.
 * **A true market share.** The basket is 7 services with a free daily volume series. Bridge aggregators route through other services, possibly including NEAR Intents, so the basket is an index, not a market total.
 
-## 6. What would change the verdict
+## 7. What would change the verdict
 
 The verdict is computed by fixed rules in `cwc/verdict.py`. It becomes NOT SUPPORTED if any of these happens on a rebuild:
 
@@ -125,9 +161,9 @@ The verdict is computed by fixed rules in `cwc/verdict.py`. It becomes NOT SUPPO
 
 **Dated check.** Rule 4 will be read again on the first snapshot whose data run through the day before 2027-02-15. Status today: not yet due.
 
-Partner-level evidence would also change it. If the largest partners from before the switch stopped sending swaps while new ones filled the gap, "without churn" would be the wrong name for what happened.
+Partner-level evidence is in section 5. It is not part of the rules, because it is a sample that others cannot retake without a key. If the largest partners from before the switch had stopped sending swaps while new ones filled the gap, "without churn" would be the wrong name for what happened. In the sample the 10 largest together sent 0.94x their earlier volume after the switch and 1.29x latest, and 2 of them fell below 10%.
 
-## 7. Method
+## 8. Method
 
 * **Data.** DefiLlama's free API, no key. Daily volume, fees and revenue for NEAR Intents, revenue by label, and daily volume for the peers. Every response is stored unchanged in `data/raw/` with its address, fetch time and SHA-256 in `data/raw/MANIFEST.json`. The rebuild stops if a file does not match.
 * **Event.** 2026-02-23. NEAR's post of 24 February 2026 says the fee switch is live. DefiLlama dates NEAR's buyback programme from 2026-02-23, and its buyback series is first above zero on 2026-02-23. Revenue from partner fees first appears earlier, on 2026-01-31, so 2026-02-02 is used as a second event date in the robustness runs.
@@ -136,6 +172,7 @@ Partner-level evidence would also change it. If the largest partners from before
 * **Main estimator.** Synthetic control with an intercept on log weekly volume: weights on the peers that are not negative and sum to one, chosen to track NEAR Intents over the weeks before the event. The weights are found exactly by solving every subset of peers, not by an iterative search.
 * **Interval.** The permutation method of Chernozhukov, Wuthrich and Zhu. For each candidate effect, take it out of the weeks after the event, refit on all weeks, and compare the mean of the last 11 residuals with the same mean under every cyclic shift. The interval is the set of candidates not rejected at the 90% level, widened by one grid step at each end.
 * **Break-even.** Revenue is volume times take. If take goes from t0 to t1, revenue is unchanged when volume changes by t0 / t1 - 1.
+* **Partner sample.** `scripts/explorer_sample.py` asks NEAR's Explorer API for up to 1,000 successful swaps that end at each of the hours 00:00, 08:00 and 16:00 UTC on every day, and keeps totals per partner app and per fee account. The files are in `data/explorer/` with their SHA-256 in `data/explorer/MANIFEST.json`, and the rebuild stops if one does not match. Taking a new sample needs a partner key; rebuilding from the stored one does not. NEAR's own apps are told apart from partners by configuration list: `near-intents.intents-referral.near` and `new.intents-referral.near`. The sampling error quoted for the largest partners comes from leaving out one day at a time.
 * **Peers.** The three native cross-chain swap protocols that SwapKit lists beside NEAR Intents, and every bridge aggregator in DefiLlama's list of 42 that has at least $1 billion of volume in the past year, is not flagged as double-counted, and has weekly volume in each of the 26 weeks before the event. The rebuild stops if the peers in the configuration differ from what these rules select. Adding the excluded candidates back changes the main estimate to +4.7%.
 
 | Service | Kind | Used as a peer | Reason if not |
@@ -153,7 +190,7 @@ Partner-level evidence would also change it. If the largest partners from before
 | 0x | bridge aggregator | no | no weekly volume in the week of 2025-08-25 |
 | Bungee | bridge aggregator | yes |  |
 
-## 8. Reproduce
+## 9. Reproduce
 
 ```
 python3 -m cwc verify      # rebuilds in memory and compares with the committed files
@@ -161,25 +198,26 @@ python3 -m cwc rebuild     # rewrites out/findings.json, THESIS.md, the README b
 python3 -m unittest discover -s tests
 ```
 
-Python 3.10 or later. No packages to install, no network, no key. Snapshot fingerprint 1517238020c83d4c, configuration fingerprint b8745fa66e1a45a5.
+Python 3.10 or later. No packages to install, no network, no key. Snapshot fingerprint 1517238020c83d4c, configuration fingerprint a42b53c71e4562e8.
 
-## 9. Not computed
+## 10. Not computed
 
 * On-chain volume from NEAR's public BigQuery tables. The question is about volume, fees and revenue, which DefiLlama already publishes.
 * Volume for Relay, Across and deBridge. DefiLlama's bridge-volume data answered "payment required" when this snapshot was taken, so they are not peers.
 * A test on daily data. Weekly sums remove the day-of-week pattern and single-day reporting gaps. The cost is a coarser test: the p-value moves in steps of one over the number of weeks.
 * Any price forecast for the NEAR token.
 
-## 10. Disclosures
+## 11. Disclosures
 
 * The code and text in this repository were written with Claude (Anthropic) under the author's direction. The design was reviewed by separate AI reviewers and revised; the design and the review notes are in `docs/designs/`.
 * No third-party code. Python standard library only.
-* Data: DefiLlama. External facts: the sources below.
+* Data: DefiLlama, and for section 5 a sample from NEAR's Explorer API taken with the author's partner key. External facts: the sources below.
 
-## 11. Sources
+## 12. Sources
 
 * NEAR, "Evolving NEAR Tokenomics", 24 February 2026: <https://near.org/blog/evolving-near-tokenomics>
 * NEAR Intents documentation, fees: <https://docs.near-intents.org/resources/fees>
+* NEAR Intents Explorer API (partner key required): <https://explorer.near-intents.org/api/v0/transactions>
 * DefiLlama, NEAR Intents (methodology notes are stored in the raw files): <https://defillama.com/protocol/near-intents>
 * NEAR, press release "NEAR Unveils Confidential Cross-Chain Infrastructure for the Agentic Economy", 25 February 2026: <https://tools.prnewswire.com/en-us/live/20813/release/20260225EN95768>
 * THORChain, exploit report for 15 May 2026: <https://blog.thorchain.org/thorchain-exploit-report-1>

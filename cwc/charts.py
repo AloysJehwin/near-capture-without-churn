@@ -558,5 +558,72 @@ def share(f: dict) -> dict:
             "columns": ["Week starting", "Share", "NEAR Intents per day", "Seven peers per day"], "rows": rows}
 
 
+# --------------------------------------------------------------------------- 9
+
+def times(value, digits: int = 2) -> str:
+    return "n/a" if value is None else "×" + num(value, digits)
+
+
+def usd_day(value: float) -> str:
+    if value >= 999500:
+        return usd_m(value, 2 if value < 9995000 else 1)
+    if value >= 1000:
+        return usd_k(value, 0)
+    return "$" + num(value, 0)
+
+
+def partners(f: dict) -> dict:
+    """The largest partner apps from before the switch: sampled volume per day in the three windows."""
+    p = f["partners"]
+    rows_in = p["top_partners"]
+    together = {"name": f"The {p['top_count']} together",
+                "after_over_before": p["top_after_over_before"], "latest_over_before": p["top_latest_over_before"]}
+    for key in ("before", "after", "latest"):
+        together[key] = {"usd_per_day": math.fsum(r[key]["usd_per_day"] for r in rows_in)}
+    units = [together] + rows_in
+    values = [u[k]["usd_per_day"] for u in units for k in ("before", "after", "latest") if u[k]["usd_per_day"] > 0]
+    lo_exp = math.floor(math.log10(min(values))) if values else 3
+    hi_exp = math.ceil(math.log10(max(values))) if values else 7
+    lo_exp = max(lo_exp, hi_exp - 5)
+    left, right, top = 190, W - 250, 52
+    row_h = 34
+    bottom = top + row_h * len(units) + 14
+    cv = Canvas(bottom + 50, "chart-partners", "The largest partner apps before the fee switch: swap volume per day in the sample",
+                "For each partner, sampled swap volume per day before the switch, after it and in the latest window, on a ratio scale.")
+    x = linear(lo_exp, hi_exp, left, right)
+    pos = lambda v: x(clip(math.log10(v), lo_exp, hi_exp)) if v > 0 else left
+    legend(cv, left, 22, [("before the switch", TAUPE), ("after it", CRIMSON), ("latest", BURGUNDY)])
+    for k in range(lo_exp, hi_exp + 1):
+        cv.line(x(k), top - 8, x(k), bottom, GRID)
+        tick = f"${10 ** (k - 6)}M" if k >= 6 else f"${10 ** (k - 3)}K" if k >= 3 else f"${10 ** k}"
+        cv.text(x(k), bottom + 18, tick, "middle", "s n")
+    cv.text(right + 18, 23, "volume per day against before", "start", "s")
+    rows = []
+    for i, u in enumerate(units):
+        y = top + row_h * i + row_h / 2 + (0 if i == 0 else 8)
+        if i == 1:
+            cv.line(24, y - row_h / 2 - 4, W - 20, y - row_h / 2 - 4, AXIS)
+        b, a, l = (u[k]["usd_per_day"] for k in ("before", "after", "latest"))
+        cv.text(24, y + 4, u["name"], "start", "b")
+        span = [pos(v) for v in (b, a, l)]
+        cv.line(min(span), y, max(span), y, AXIS, 2)
+        for value, colour, r in ((b, TAUPE, 6.5), (l, BURGUNDY, 5.5), (a, CRIMSON, 5.5)):
+            if value > 0 and math.log10(value) >= lo_exp:
+                cv.dot(pos(value), y, r, colour)
+            else:
+                cv.add(f'<circle cx="{c(left)}" cy="{c(y)}" r="{c(r - 1)}" fill="{SURFACE}" stroke="{colour}" stroke-width="2"/>')
+        ratio_text = f"after {times(u['after_over_before'])}, latest {times(u['latest_over_before'])}"
+        cv.text(right + 18, y + 4, ratio_text, "start", "n" if i else "b n")
+        tip = f"{u['name']}: {usd_day(b)} a day before, {usd_day(a)} after, {usd_day(l)} latest ({ratio_text})"
+        cv.hit(24, y - row_h / 2, W - 44, row_h, tip)
+        rows.append([u["name"], usd_day(b), usd_day(a), usd_day(l), times(u["after_over_before"]), times(u["latest_over_before"])])
+    cv.text(left, bottom + 40, "Each step on the scale is ten times the one before. An open ring at the left edge: below the scale or none in the sample.", "start", "s")
+    return {"id": "partners", "svg": cv.svg(), "alt": "Sampled swap volume per day for the largest partner apps before the switch, in three windows.",
+            "columns": ["Partner app", "Per day before", "Per day after", "Per day latest", "After against before", "Latest against before"], "rows": rows}
+
+
 def all_charts(f: dict) -> list:
-    return [ruler(f), capture(f), fee_rate(f), basket(f), placebo(f), spec_curve(f), growth(f), share(f)]
+    out = [ruler(f), capture(f), fee_rate(f), basket(f), placebo(f), spec_curve(f), growth(f), share(f)]
+    if f["partners"]["available"]:
+        out.append(partners(f))
+    return out

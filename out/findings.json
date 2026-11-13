@@ -99,6 +99,35 @@
   "latest_weeks": 13,
   "min_days_per_week": 5,
   "outage_min_days": 3,
+  "partners": {
+   "display_names": {
+    "zashi": "zashi / zodl"
+   },
+   "gone_below": 0.1,
+   "near_wallets": {
+    "front_end": [
+     "fefundsadmin.sputnik-dao.near"
+    ],
+    "partner_share": [
+     "1csfundsadmin.sputnik-dao.near",
+     "buybacks.multisignature.near"
+    ]
+   },
+   "no_referral": "(none)",
+   "own_front_end_referrals": [
+    "near-intents.intents-referral.near",
+    "new.intents-referral.near"
+   ],
+   "same_partner": {
+    "zodl": "zashi"
+   },
+   "sample_files": [
+    "data/explorer/explorer_sample.json",
+    "data/explorer/explorer_sample_fee_split.json"
+   ],
+   "source": "NEAR Intents Explorer API, GET /api/v0/transactions (successful swaps made through the 1Click service)",
+   "top": 10
+  },
   "peer_rule": {
    "min_history_weeks_before_event": 26,
    "min_trailing_year_volume_usd": 1000000000
@@ -546,7 +575,7 @@
   "alt_event_dates": [
    "2026-02-02"
   ],
-  "analysis_config_sha256": "b8745fa66e1a45a5a9bd7e2caaae876b66959fa316a6e85d37ba7761c917a2e6",
+  "analysis_config_sha256": "a42b53c71e4562e85107c90ad65afa0a1aebe4b4a819f432ac643283671a9f29",
   "data_through": "2026-11-12",
   "event_date": "2026-02-23",
   "last_complete_week_end": "2026-11-08",
@@ -554,6 +583,471 @@
   "series_config_sha256": "2f70982232206082b3c5a7ea847b48161abf99a304df1347bb95f637ba516160",
   "snapshot_fetched_utc": "2026-11-13T18:09:28Z",
   "version": "1.0.0"
+ },
+ "partners": {
+  "all_partners_after_over_before": 0.954098,
+  "all_partners_latest_over_before": 1.440884,
+  "available": true,
+  "blocks": 1050,
+  "blocks_with_fee_accounts_per_partner": 0,
+  "files": [
+   {
+    "blocks": 1050,
+    "blocks_failed": 0,
+    "design": {
+     "block_seconds": 28800,
+     "cap_usd": 100000.0,
+     "fee_recipient_fields": [
+      "fee_entries",
+      "fee_bps_times_usd"
+     ],
+     "first_day": "2025-11-24",
+     "hours_utc": [
+      0,
+      8,
+      16
+     ],
+     "last_day": "2026-11-08",
+     "page_size": 1000,
+     "referral_fields": [
+      "swaps",
+      "usd",
+      "usd_capped",
+      "fee_bps_times_usd",
+      "swaps_with_app_fee"
+     ],
+     "statuses": "SUCCESS"
+    },
+    "file": "explorer_sample.json",
+    "sampled_from_utc": "2026-11-13T18:43:46Z",
+    "sampled_to_utc": "2026-11-13T20:18:15Z",
+    "sha256": "809349ffbb992d43462187d74b3447a4fd82c4b22c0f0b12850356a8defcc3be"
+   }
+  ],
+  "first_day": "2025-11-23",
+  "gone_below": 0.1,
+  "hours_utc": [
+   0,
+   8,
+   16
+  ],
+  "last_day": "2026-11-08",
+  "near_wallets": {
+   "front_end": [
+    "fefundsadmin.sputnik-dao.near"
+   ],
+   "partner_share": [
+    "1csfundsadmin.sputnik-dao.near",
+    "buybacks.multisignature.near"
+   ]
+  },
+  "new_partner_share_of_partner_volume_latest": 0.099494,
+  "own_front_end_after_over_before": 1.0563,
+  "own_front_end_latest_over_before": 0.482014,
+  "own_front_end_referrals": [
+   "near-intents.intents-referral.near",
+   "new.intents-referral.near"
+  ],
+  "own_front_end_rule": "configuration list",
+  "source": "NEAR Intents Explorer API, GET /api/v0/transactions (successful swaps made through the 1Click service)",
+  "swaps": 1048000,
+  "top_after_over_before": 0.937828,
+  "top_after_over_before_capped": 0.936286,
+  "top_after_over_before_se_log": 0.074806,
+  "top_count": 10,
+  "top_gone_after": [
+   "infinex.near",
+   "rhea"
+  ],
+  "top_gone_latest": [
+   "infinex.near"
+  ],
+  "top_halved_after": [
+   "zashi / zodl",
+   "infinex.near",
+   "rhea",
+   "solswap.intents-referral.near"
+  ],
+  "top_latest_over_before": 1.290176,
+  "top_latest_over_before_se_log": 0.069596,
+  "top_partners": [
+   {
+    "after": {
+     "app_fee_bps": 76.636058,
+     "near_share_of_its_fees": null,
+     "swaps": 70943,
+     "usd_per_day": 10642360.423281,
+     "usd_per_day_capped": 8896612.501104
+    },
+    "after_over_before": 1.090882,
+    "after_over_before_capped": 1.06378,
+    "before": {
+     "app_fee_bps": 92.174655,
+     "near_share_of_its_fees": null,
+     "swaps": 67935,
+     "usd_per_day": 9755737.945147,
+     "usd_per_day_capped": 8363203.407146
+    },
+    "latest": {
+     "app_fee_bps": 80.137257,
+     "near_share_of_its_fees": null,
+     "swaps": 104328,
+     "usd_per_day": 13327253.981372,
+     "usd_per_day_capped": 10381897.193483
+    },
+    "latest_over_before": 1.366094,
+    "name": "swapkit",
+    "partner": "swapkit",
+    "share_of_partner_volume_before": 0.527267
+   },
+   {
+    "after": {
+     "app_fee_bps": 3.96515,
+     "near_share_of_its_fees": null,
+     "swaps": 60517,
+     "usd_per_day": 2552785.280425,
+     "usd_per_day_capped": 2243013.075655
+    },
+    "after_over_before": 0.858926,
+    "after_over_before_capped": 0.866619,
+    "before": {
+     "app_fee_bps": 1.051373,
+     "near_share_of_its_fees": null,
+     "swaps": 78732,
+     "usd_per_day": 2972067.593522,
+     "usd_per_day_capped": 2588234.515628
+    },
+    "latest": {
+     "app_fee_bps": 16.682612,
+     "near_share_of_its_fees": null,
+     "swaps": 37342,
+     "usd_per_day": 2825976.907342,
+     "usd_per_day_capped": 2581862.340876
+    },
+    "latest_over_before": 0.950845,
+    "name": "rango",
+    "partner": "rango",
+    "share_of_partner_volume_before": 0.160631
+   },
+   {
+    "after": {
+     "app_fee_bps": 65.055208,
+     "near_share_of_its_fees": null,
+     "swaps": 2879,
+     "usd_per_day": 1175274.381836,
+     "usd_per_day_capped": 949411.649211
+    },
+    "after_over_before": 0.489631,
+    "after_over_before_capped": 0.548302,
+    "before": {
+     "app_fee_bps": 53.324301,
+     "near_share_of_its_fees": null,
+     "swaps": 4793,
+     "usd_per_day": 2400327.962821,
+     "usd_per_day_capped": 1731547.436697
+    },
+    "latest": {
+     "app_fee_bps": 66.999971,
+     "near_share_of_its_fees": null,
+     "swaps": 4957,
+     "usd_per_day": 2390007.570518,
+     "usd_per_day_capped": 1807850.842176
+    },
+    "latest_over_before": 0.9957,
+    "name": "zashi / zodl",
+    "partner": "zashi",
+    "share_of_partner_volume_before": 0.12973
+   },
+   {
+    "after": {
+     "app_fee_bps": 0.0,
+     "near_share_of_its_fees": null,
+     "swaps": 205,
+     "usd_per_day": 40692.827729,
+     "usd_per_day_capped": 40692.827729
+    },
+    "after_over_before": 0.059745,
+    "after_over_before_capped": 0.070515,
+    "before": {
+     "app_fee_bps": 0.0,
+     "near_share_of_its_fees": null,
+     "swaps": 2010,
+     "usd_per_day": 681109.766489,
+     "usd_per_day_capped": 577082.801769
+    },
+    "latest": {
+     "app_fee_bps": 16.095116,
+     "near_share_of_its_fees": null,
+     "swaps": 99,
+     "usd_per_day": 28356.721243,
+     "usd_per_day_capped": 25582.174327
+    },
+    "latest_over_before": 0.041633,
+    "name": "infinex.near",
+    "partner": "infinex.near",
+    "share_of_partner_volume_before": 0.036812
+   },
+   {
+    "after": {
+     "app_fee_bps": 4.659229,
+     "near_share_of_its_fees": null,
+     "swaps": 24522,
+     "usd_per_day": 1361059.355981,
+     "usd_per_day_capped": 1156897.435913
+    },
+    "after_over_before": 2.175124,
+    "after_over_before_capped": 1.929758,
+    "before": {
+     "app_fee_bps": 0.0,
+     "near_share_of_its_fees": null,
+     "swaps": 10716,
+     "usd_per_day": 625738.719302,
+     "usd_per_day_capped": 599503.941138
+    },
+    "latest": {
+     "app_fee_bps": 5.844781,
+     "near_share_of_its_fees": null,
+     "swaps": 20475,
+     "usd_per_day": 3318604.71487,
+     "usd_per_day_capped": 2557530.500447
+    },
+    "latest_over_before": 5.303499,
+    "name": "lifi",
+    "partner": "lifi",
+    "share_of_partner_volume_before": 0.033819
+   },
+   {
+    "after": {
+     "app_fee_bps": 12.488444,
+     "near_share_of_its_fees": null,
+     "swaps": 314,
+     "usd_per_day": 10725.705642,
+     "usd_per_day_capped": 10725.705642
+    },
+    "after_over_before": 0.034617,
+    "after_over_before_capped": 0.036978,
+    "before": {
+     "app_fee_bps": 6.246242,
+     "near_share_of_its_fees": null,
+     "swaps": 3596,
+     "usd_per_day": 309841.448905,
+     "usd_per_day_capped": 290057.699489
+    },
+    "latest": {
+     "app_fee_bps": 2.607203,
+     "near_share_of_its_fees": null,
+     "swaps": 1191,
+     "usd_per_day": 160120.981935,
+     "usd_per_day_capped": 147589.158033
+    },
+    "latest_over_before": 0.516784,
+    "name": "rhea",
+    "partner": "rhea",
+    "share_of_partner_volume_before": 0.016746
+   },
+   {
+    "after": {
+     "app_fee_bps": 0.984386,
+     "near_share_of_its_fees": null,
+     "swaps": 449,
+     "usd_per_day": 202718.233722,
+     "usd_per_day_capped": 199768.520918
+    },
+    "after_over_before": 0.655524,
+    "after_over_before_capped": 0.806262,
+    "before": {
+     "app_fee_bps": 0.021758,
+     "near_share_of_its_fees": null,
+     "swaps": 506,
+     "usd_per_day": 309246.22357,
+     "usd_per_day_capped": 247771.137762
+    },
+    "latest": {
+     "app_fee_bps": 1.850347,
+     "near_share_of_its_fees": null,
+     "swaps": 397,
+     "usd_per_day": 395338.202898,
+     "usd_per_day_capped": 280114.745917
+    },
+    "latest_over_before": 1.278393,
+    "name": "stableflow",
+    "partner": "stableflow",
+    "share_of_partner_volume_before": 0.016714
+   },
+   {
+    "after": {
+     "app_fee_bps": 0.0,
+     "near_share_of_its_fees": null,
+     "swaps": 379,
+     "usd_per_day": 310290.265021,
+     "usd_per_day_capped": 310290.265021
+    },
+    "after_over_before": 1.050929,
+    "after_over_before_capped": 1.054055,
+    "before": {
+     "app_fee_bps": 0.0,
+     "near_share_of_its_fees": null,
+     "swaps": 342,
+     "usd_per_day": 295253.173605,
+     "usd_per_day_capped": 294377.814089
+    },
+    "latest": {
+     "app_fee_bps": 0.511095,
+     "near_share_of_its_fees": null,
+     "swaps": 52,
+     "usd_per_day": 39234.880388,
+     "usd_per_day_capped": 39234.880388
+    },
+    "latest_over_before": 0.132886,
+    "name": "meru",
+    "partner": "meru",
+    "share_of_partner_volume_before": 0.015958
+   },
+   {
+    "after": {
+     "app_fee_bps": 27.032595,
+     "near_share_of_its_fees": null,
+     "swaps": 57,
+     "usd_per_day": 70784.615717,
+     "usd_per_day_capped": 50218.687267
+    },
+    "after_over_before": 0.408495,
+    "after_over_before_capped": 0.296603,
+    "before": {
+     "app_fee_bps": 20.803083,
+     "near_share_of_its_fees": null,
+     "swaps": 301,
+     "usd_per_day": 173281.554496,
+     "usd_per_day_capped": 169312.783224
+    },
+    "latest": {
+     "app_fee_bps": 14.978254,
+     "near_share_of_its_fees": null,
+     "swaps": 135,
+     "usd_per_day": 22371.901752,
+     "usd_per_day_capped": 22371.901752
+    },
+    "latest_over_before": 0.129107,
+    "name": "solswap.intents-referral.near",
+    "partner": "solswap.intents-referral.near",
+    "share_of_partner_volume_before": 0.009365
+   },
+   {
+    "after": {
+     "app_fee_bps": 6.3e-05,
+     "near_share_of_its_fees": null,
+     "swaps": 1049,
+     "usd_per_day": 226008.471715,
+     "usd_per_day_capped": 196875.790588
+    },
+    "after_over_before": 1.32875,
+    "after_over_before_capped": 1.314027,
+    "before": {
+     "app_fee_bps": 0.0,
+     "near_share_of_its_fees": null,
+     "swaps": 1093,
+     "usd_per_day": 170091.027907,
+     "usd_per_day_capped": 149826.273753
+    },
+    "latest": {
+     "app_fee_bps": 1.038177,
+     "near_share_of_its_fees": null,
+     "swaps": 1650,
+     "usd_per_day": 319423.022915,
+     "usd_per_day_capped": 299209.853609
+    },
+    "latest_over_before": 1.877953,
+    "name": "cow",
+    "partner": "cow",
+    "share_of_partner_volume_before": 0.009193
+   }
+  ],
+  "top_share_of_partner_volume_before": 0.956235,
+  "top_still_sending_after": 10,
+  "top_still_sending_latest": 10,
+  "windows": {
+   "after": {
+    "app_fee_bps": 43.27807,
+    "blocks": 231,
+    "days_sampled": 77,
+    "end": "2026-05-10",
+    "fee_share_to_near": 0.088488,
+    "fee_share_to_near_front_end_wallet": 0.029117,
+    "fee_share_to_near_partner_share_wallets": 0.059371,
+    "hours_covered": 335.117778,
+    "partner_app_fee_bps": 52.944405,
+    "partners_seen": 108,
+    "referrals_seen": 111,
+    "share_of_defillama_volume": 0.364436,
+    "start": "2026-02-23",
+    "swaps": 229000,
+    "usd_per_day": 23498295.737512,
+    "usd_per_day_by_kind": {
+     "no referral": 863827.028693,
+     "own front end": 4981319.902124,
+     "partner": 17653148.830328
+    },
+    "volume_share": {
+     "no referral": 0.036761,
+     "own front end": 0.211986,
+     "partner": 0.751252
+    }
+   },
+   "before": {
+    "app_fee_bps": 48.829771,
+    "blocks": 273,
+    "days_sampled": 91,
+    "end": "2026-02-22",
+    "fee_share_to_near": 0.07867,
+    "fee_share_to_near_front_end_wallet": 0.070656,
+    "fee_share_to_near_partner_share_wallets": 0.008014,
+    "hours_covered": 443.976667,
+    "partner_app_fee_bps": 57.26549,
+    "partners_seen": 109,
+    "referrals_seen": 112,
+    "share_of_defillama_volume": 0.300746,
+    "start": "2025-11-24",
+    "swaps": 273000,
+    "usd_per_day": 23765344.599791,
+    "usd_per_day_by_kind": {
+     "no referral": 547070.582388,
+     "own front end": 4715817.126065,
+     "partner": 18502456.894582
+    },
+    "volume_share": {
+     "no referral": 0.02302,
+     "own front end": 0.198433,
+     "partner": 0.778548
+    }
+   },
+   "latest": {
+    "app_fee_bps": 42.731334,
+    "blocks": 272,
+    "days_sampled": 91,
+    "end": "2026-11-08",
+    "fee_share_to_near": 0.074557,
+    "fee_share_to_near_front_end_wallet": 0.005101,
+    "fee_share_to_near_partner_share_wallets": 0.069456,
+    "hours_covered": 361.546944,
+    "partner_app_fee_bps": 53.566551,
+    "partners_seen": 299,
+    "referrals_seen": 302,
+    "share_of_defillama_volume": 0.267153,
+    "start": "2026-08-10",
+    "swaps": 272000,
+    "usd_per_day": 35258006.878381,
+    "usd_per_day_by_kind": {
+     "no referral": 6325021.489848,
+     "own front end": 2273090.519027,
+     "partner": 26659894.888757
+    },
+    "volume_share": {
+     "no referral": 0.179392,
+     "own front end": 0.06447,
+     "partner": 0.756137
+    }
+   }
+  }
  },
  "peers": {
   "definition_changes": [

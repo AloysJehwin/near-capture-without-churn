@@ -9,7 +9,7 @@ from __future__ import annotations
 import datetime as dt
 import math
 
-from . import __version__, data, metrics, pool, speccurve, synth, verdict
+from . import __version__, data, metrics, partners, pool, speccurve, synth, verdict
 
 Date = dt.date
 WEEK = data.ONE_WEEK
@@ -359,6 +359,16 @@ def build_findings(root) -> dict:
         })
         end += WEEK
 
+    # Partner by partner, from the stored sample of NEAR's own swap records (optional data).
+    sample = partners.load(root, cfg)
+    if sample is None:
+        partner_view = {"available": False}
+    else:
+        partner_view = partners.analyse(
+            sample, cfg,
+            {"before": (pre_start, event), "after": (event, post_end), "latest": (latest_start, latest_end)},
+            {name: windows[name]["volume_per_day"] for name in ("before", "after", "latest")})
+
     by_key = {entry["key"]: entry for entry in manifest["series"]}
     snapshot = [{
         "key": s["key"], "name": s["name"], "role": s["role"], "measure": s["measure"], "url": s["url"],
@@ -397,6 +407,7 @@ def build_findings(root) -> dict:
         "share_check": share_now,
         "forward_check": forward,
         "verdict": decision,
+        "partners": partner_view,
         "series": {"weekly": weekly, "trailing": trailing},
     }
 
