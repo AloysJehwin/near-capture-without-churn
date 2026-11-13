@@ -1,0 +1,35 @@
+{
+  "source": "DefiLlama free API (https://api.llama.fi), no key",
+  "roles": {
+      "treated": "NEAR Intents, the service the thesis is about",
+      "peer": "a comparison service used in the tests",
+      "candidate": "a bridge aggregator that passes the size rule but fails another rule; kept so the exclusion can be checked and reversed",
+      "universe": "the list the bridge-aggregator peers are selected from"
+  },
+  "fields": {
+      "name": "short name used in tables and charts",
+      "protocol": "the name DefiLlama uses",
+      "group": "protocol = a native cross-chain swap protocol; aggregator = a bridge aggregator",
+      "definition_change": "a date on which DefiLlama states that the series changes what it measures (quoted from the methodology text in the raw file)"
+  },
+  "series": [
+    {"key": "near_intents_volume", "name": "NEAR Intents", "protocol": "NEAR Intents", "role": "treated", "measure": "volume", "url": "https://api.llama.fi/summary/dexs/near-intents"},
+    {"key": "near_intents_fees", "name": "NEAR Intents", "protocol": "NEAR Intents", "role": "treated", "measure": "fees", "url": "https://api.llama.fi/summary/fees/near-intents?dataType=dailyFees"},
+    {"key": "near_intents_revenue", "name": "NEAR Intents", "protocol": "NEAR Intents", "role": "treated", "measure": "revenue", "url": "https://api.llama.fi/summary/fees/near-intents?dataType=dailyRevenue"},
+    {"key": "near_intents_holders_revenue", "name": "NEAR Intents", "protocol": "NEAR Intents", "role": "treated", "measure": "holders_revenue", "url": "https://api.llama.fi/summary/fees/near-intents?dataType=dailyHoldersRevenue"},
+    {"key": "near_intents_revenue_by_label", "name": "NEAR Intents", "protocol": "NEAR Intents", "role": "treated", "measure": "revenue_by_label", "url": "https://api.llama.fi/v2/chart/fees/protocol/near-intents/label-breakdown?dataType=dailyRevenue"},
+    {"key": "thorchain_dex_volume", "name": "THORChain", "protocol": "THORChain DEX", "role": "peer", "measure": "volume", "group": "protocol", "url": "https://api.llama.fi/summary/dexs/thorchain-dex"},
+    {"key": "chainflip_amm_volume", "name": "Chainflip", "protocol": "Chainflip AMM", "role": "peer", "measure": "volume", "group": "protocol", "url": "https://api.llama.fi/summary/dexs/chainflip-amm"},
+    {"key": "maya_protocol_volume", "name": "Maya Protocol", "protocol": "Maya Protocol", "role": "peer", "measure": "volume", "group": "protocol", "url": "https://api.llama.fi/summary/dexs/maya-protocol"},
+    {"key": "lifi_bridge_agg_volume", "name": "LI.FI", "protocol": "LI.FI Bridge Aggregator", "role": "peer", "measure": "volume", "group": "aggregator", "url": "https://api.llama.fi/summary/bridge-aggregators/li.fi-bridge-aggregator"},
+    {"key": "socket_volume", "name": "SOCKET", "protocol": "SOCKET Protocol", "role": "peer", "measure": "volume", "group": "aggregator", "definition_change": "2026-06-11", "url": "https://api.llama.fi/summary/bridge-aggregators/socket-protocol"},
+    {"key": "rango_volume", "name": "Rango", "protocol": "Rango", "role": "peer", "measure": "volume", "group": "aggregator", "url": "https://api.llama.fi/summary/bridge-aggregators/rango"},
+    {"key": "bungee_bridge_agg_volume", "name": "Bungee", "protocol": "Bungee Bridge Aggregator", "role": "peer", "measure": "volume", "group": "aggregator", "url": "https://api.llama.fi/summary/bridge-aggregators/bungee-bridge-aggregator"},
+    {"key": "jumper_bridge_agg_volume", "name": "Jumper", "protocol": "Jumper Bridge Aggregator", "role": "candidate", "measure": "volume", "group": "aggregator", "url": "https://api.llama.fi/summary/bridge-aggregators/jumper-bridge-aggregator"},
+    {"key": "opensea_bridge_agg_volume", "name": "OpenSea", "protocol": "OpenSea Bridge Aggregator", "role": "candidate", "measure": "volume", "group": "aggregator", "url": "https://api.llama.fi/summary/bridge-aggregators/opensea-bridge-aggregator"},
+    {"key": "silentswap_volume", "name": "Silentswap", "protocol": "Silentswap", "role": "candidate", "measure": "volume", "group": "aggregator", "url": "https://api.llama.fi/summary/bridge-aggregators/silentswap"},
+    {"key": "bitget_wallet_x_volume", "name": "Bitget Wallet X", "protocol": "Bitget Wallet X", "role": "candidate", "measure": "volume", "group": "aggregator", "url": "https://api.llama.fi/summary/bridge-aggregators/bitget-wallet-x"},
+    {"key": "zerox_bridge_agg_volume", "name": "0x", "protocol": "0x Bridge Aggregator", "role": "candidate", "measure": "volume", "group": "aggregator", "url": "https://api.llama.fi/summary/bridge-aggregators/0x-bridge-aggregator"},
+    {"key": "bridge_aggregators_overview", "name": "Bridge aggregators", "protocol": "all bridge aggregators", "role": "universe", "measure": "overview", "url": "https://api.llama.fi/overview/bridge-aggregators?excludeTotalDataChart=true&excludeTotalDataChartBreakdown=true"}
+  ]
+}

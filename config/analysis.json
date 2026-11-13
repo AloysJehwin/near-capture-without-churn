@@ -1,0 +1,20 @@
+{
+  "event_date": "2026-02-23",
+  "alt_event_dates": ["2026-02-02"],
+  "pre_weeks": 13,
+  "post_weeks": 11,
+  "latest_weeks": 13,
+  "min_days_per_week": 5,
+  "outage_min_days": 3,
+  "interval_level": 0.9,
+  "strict_band": 0.15,
+  "kill_share": 0.5,
+  "backtest_holdout_weeks": 5,
+  "theta_grid": {"min": -1.61, "max": 1.1, "step": 0.005, "coarse_step": 0.02},
+  "share_check": {"capture_floor": 0.2, "max_share_drop_pp": 10.0},
+  "forward_check_date": "2027-02-15",
+  "peer_rule": {"min_trailing_year_volume_usd": 1000000000, "min_history_weeks_before_event": 26},
+  "spec_curve": {"pre_weeks": [9, 13, 17], "post_weeks": [7, 9, 11, 13, 26], "min_donors": 2, "max_donors_exact": 12},
+  "labels": {"front_end": "Front-end Affiliate Revenue", "other": "Other Revenue"},
+  "written_for": {"cut_rose": true, "paid_for_itself": true, "loss_detected": false, "strict": false, "share_held": true, "kill": false}
+}
