@@ -50,7 +50,7 @@ Needs Python 3.10 or later. Nothing to install. No network. No API key.
 | --- | --- |
 | `THESIS.md` | The thesis: verdict, evidence for, evidence against, what would change it. Generated. |
 | `out/findings.json` | Every number, the verdict, the data fingerprints. Generated. Everything else is formatted from this file. |
-| `docs/index.html`, `docs/charts/` | Dashboard and its nine charts. Generated. No external files. |
+| `docs/index.html`, `docs/charts/` | Dashboard and its nine charts. Generated. No external files. One section, "Check it yourself", downloads today's numbers from DefiLlama when a visitor presses its button and redoes the headline sum in the browser; nothing else on the page uses the network. |
 | `data/raw/` | DefiLlama's responses, stored unchanged, with `MANIFEST.json` (address, fetch time, SHA-256). |
 | `data/explorer/` | A sample of NEAR's own swap records, kept as totals per partner app, with `MANIFEST.json` (SHA-256). No user addresses, no single swaps. |
 | `config/series.json` | The data sources and which service plays which role. |

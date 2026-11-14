@@ -59,6 +59,17 @@ tr:last-child td{border-bottom:0}
 ol.against{padding-left:22px;max-width:74ch}
 ol.against li{margin:0 0 12px}
 ol.against b{font-weight:600}
+.live{background:var(--surface,#FBF6EA);border-radius:10px;padding:22px 24px;margin:18px 0 0}
+.live button{font:inherit;font-weight:600;color:#FBF6EA;background:#A8142D;border:0;border-radius:6px;padding:10px 18px;cursor:pointer}
+.live button:disabled{opacity:.55;cursor:wait}
+.live button:focus-visible,.live input:focus-visible{outline:3px solid #1D6996;outline-offset:2px}
+.live table{border-collapse:collapse;margin:16px 0 6px;font-variant-numeric:tabular-nums}
+.live th,.live td{text-align:right;padding:6px 14px 6px 0;border-bottom:1px solid #E4D8BE}
+.live th:first-child,.live td:first-child{text-align:left}
+.live .status{margin:12px 0 0;font-size:14px;color:#6B5560}
+.live .result{font-size:19px;margin:14px 0 0;max-width:70ch}
+.live input[type=range]{width:min(520px,100%);accent-color:#A8142D}
+.live label{display:block;font-weight:600;margin:22px 0 6px}
 ul.notes{padding-left:20px;max-width:78ch;margin:18px 0 0}
 ul.notes li{margin:0 0 10px}
 ul.notes b{font-weight:600}
@@ -79,6 +90,23 @@ if(!el){tip.hidden=true;return;}tip.textContent=el.getAttribute('data-tip');tip.
 document.addEventListener('mousemove',show);document.addEventListener('click',show);
 document.addEventListener('scroll',function(){tip.hidden=true;},true);
 document.addEventListener('mouseleave',function(){tip.hidden=true;});})();
+(function(){var box=document.getElementById('live');if(!box)return;
+var C=JSON.parse(document.getElementById('live-config').textContent),ratio=C.committed_ratio,src='the committed snapshot';
+var $=function(id){return document.getElementById(id);};
+function money(v){return v>=1e9?'$'+(v/1e9).toFixed(2)+'B':v>=1e6?'$'+(v/1e6).toFixed(1)+'M':'$'+Math.round(v/1e3)+'K';}
+function slide(){var c=+$('live-slider').value,r=(ratio*(1+c/100)-1)*100,be=(1/ratio-1)*100;
+$('live-slide-out').textContent='With volume '+(c>=0?'up ':'down ')+Math.abs(c)+'%, NEAR\\'s revenue from swaps would be '+(r>=0?'up ':'down ')+Math.abs(r).toFixed(1)+'%. Break-even is a '+Math.abs(be).toFixed(1)+'% fall in volume (take ratio '+ratio.toFixed(2)+'x, from '+src+').';}
+$('live-slider').addEventListener('input',slide);slide();
+function total(d,a,b){var s=0,n=0;d.totalDataChart.forEach(function(p){if(p[0]>=a&&p[0]<b){s+=p[1];n++;}});return{s:s,n:n};}
+$('live-run').addEventListener('click',function(){var btn=this,st=$('live-status');btn.disabled=true;st.textContent='Asking DefiLlama for volume, fees and revenue…';
+Promise.all(C.urls.map(function(u){return fetch(u).then(function(x){if(!x.ok)throw new Error('DefiLlama answered '+x.status);return x.json();});})).then(function(d){
+var last=Math.floor(Date.now()/864e5)*86400,W=[['Before the switch',C.before[0],C.before[1]],['After it',C.after[0],C.after[1]],['Last 91 days',last-91*86400,last]],rows='',t=[];
+W.forEach(function(w){var v=total(d[0],w[1],w[2]),f=total(d[1],w[1],w[2]),r=total(d[2],w[1],w[2]),take=r.s/v.s*1e4;t.push(take);
+rows+='<tr><td>'+w[0]+'</td><td>'+v.n+'</td><td>'+money(v.s)+'</td><td>'+money(f.s)+'</td><td>'+money(r.s)+'</td><td>'+take.toFixed(2)+'</td></tr>';});
+$('live-rows').innerHTML=rows;$('live-table').hidden=false;var lr=t[1]/t[0];
+$('live-result').textContent='Live: NEAR\\'s take per $100 swapped went from '+t[0].toFixed(2)+' to '+t[1].toFixed(2)+' cents ('+lr.toFixed(2)+'x) and is '+t[2].toFixed(2)+' now. The committed snapshot says '+C.committed_booked[0].toFixed(2)+' to '+C.committed_booked[1].toFixed(2)+' ('+(C.committed_booked[1]/C.committed_booked[0]).toFixed(2)+'x) on the same basis.';
+st.textContent='Fetched '+new Date().toISOString().slice(0,16).replace('T',' ')+' UTC from api.llama.fi and computed in this page. Revenue here is counted on the day DefiLlama books it; the thesis also spreads it over the days it was earned, which gives '+C.committed_ratio.toFixed(2)+'x.';
+slide();btn.disabled=false;btn.textContent='Pull again';}).catch(function(e){st.textContent='Could not reach DefiLlama ('+e.message+'). The slider below still works from the committed snapshot.';btn.disabled=false;});});})();
 """
 
 
@@ -154,6 +182,34 @@ def render(f: dict) -> str:
         against += [bold(item) for item in pf["partner_against_items"][:2]]
     else:
         against.append("<b>Total volume cannot show which partners stayed.</b> That needs swap-level data from NEAR's Explorer API.")
+    import datetime as _dt
+    import json as _json
+    def _unix(day, plus=0):
+        d = _dt.date.fromisoformat(day) + _dt.timedelta(days=plus)
+        return int(_dt.datetime(d.year, d.month, d.day, tzinfo=_dt.timezone.utc).timestamp())
+    wb, wa = f["windows"]["before"], f["windows"]["after"]
+    booked = [w["capture_booked"] * w["fee_rate_bps"] for w in (wb, wa)]
+    live_config = {
+        "urls": ["https://api.llama.fi/summary/dexs/near-intents", "https://api.llama.fi/summary/fees/near-intents?dataType=dailyFees",
+                 "https://api.llama.fi/summary/fees/near-intents?dataType=dailyRevenue"],
+        "before": [_unix(wb["end"], 1 - wb["days"]), _unix(wb["end"], 1)],
+        "after": [_unix(wa["end"], 1 - wa["days"]), _unix(wa["end"], 1)],
+        "committed_booked": [round(x, 4) for x in booked],
+        "committed_ratio": round(f["changes"]["after_vs_before"]["take_ratio_earned"], 4),
+    }
+    live_block = [
+        '<section id="live"><h2>Check it yourself, with today\'s data</h2>',
+        '<p class="lede">Everything above comes from a stored snapshot, so that anyone can rebuild it byte for byte. This part does not: the button asks DefiLlama for the current numbers and your browser redoes the headline sum.</p>',
+        '<div class="live"><button type="button" id="live-run">Pull live data from DefiLlama</button>',
+        '<p class="status" id="live-status" role="status">Nothing is downloaded until you press the button.</p>',
+        '<table id="live-table" hidden><thead><tr><th>Window</th><th>Days</th><th>Swap volume</th><th>Fees users paid</th><th>Revenue to NEAR</th><th>Take per $100 (cents)</th></tr></thead><tbody id="live-rows"></tbody></table>',
+        '<p class="result" id="live-result"></p>',
+        '<label for="live-slider">What if volume had changed? Drag to test.</label>',
+        '<input type="range" id="live-slider" min="-60" max="40" step="1" value="-2">',
+        '<p class="result" id="live-slide-out"></p></div>',
+        f'<script type="application/json" id="live-config">{_json.dumps(live_config, sort_keys=True)}</script>',
+        "</section>",
+    ]
     partner_block = []
     if pf["partners_available"]:
         pv = f["partners"]
@@ -241,6 +297,7 @@ def render(f: dict) -> str:
                sources(f, ["near_intents_volume"] + peer_keys)),
         "</section>",
 
+        *live_block,
         *partner_block,
 
         '<section><h2>What counts against the thesis</h2><ol class="against">' + "".join(f"<li>{minus(item)}</li>" for item in against) + "</ol></section>",
