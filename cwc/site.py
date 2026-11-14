@@ -76,6 +76,7 @@ ul.notes b{font-weight:600}
 footer{margin:64px 0 0;padding:26px 0 44px;border-top:1px solid var(--rule);font-size:14px;color:var(--ink2)}
 #tip{position:fixed;z-index:9;max-width:340px;background:var(--deep);color:var(--ivory);font-size:13px;line-height:1.4;padding:7px 10px;border-radius:4px;pointer-events:none}
 .note{background:var(--ivory);border-left:4px solid var(--crimson);padding:12px 16px;margin:0 0 18px;max-width:74ch}
+@media (min-width:1360px){.wrap{max-width:min(1640px,94vw)}main.wrap{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:56px;align-items:start}main.wrap>*{grid-column:1/-1}main.wrap>section.half{grid-column:auto}svg.chart{min-width:0}h1{max-width:28ch}.answer{max-width:80ch}}
 @media (max-width:720px){.wrap{padding:0 18px}.three{grid-template-columns:1fr}.three div+div{padding-left:0;border-left:0;border-top:1px solid #7C3A47;margin-top:14px}
 .mast{padding-bottom:120px}.hero{margin-top:-96px}.panel{padding:14px 12px 8px}}
 """
@@ -249,20 +250,20 @@ def render(f: dict) -> str:
                sources(f, ["near_intents_volume"] + peer_keys)),
         "</div></section>",
 
-        f'<section><h2>NEAR\'s take per $100 swapped went from {e(v["take_before"])} to {e(v["take_after"])} cents</h2>',
+        f'<section class="half"><h2>NEAR\'s take per $100 swapped went from {e(v["take_before"])} to {e(v["take_after"])} cents</h2>',
         f'<p class="lede">Before the switch NEAR earned little from swaps that partner apps sent: its share of partner fees, with smaller items, was {e(v["other_before"])} of all fees (red). '
         f'In the {e(v["after_weeks"])} weeks after it was {e(v["other_after"])}, and in the latest {e(v["latest_weeks"])} weeks {e(v["other_latest"])}. The blue part is NEAR\'s own app.</p>',
         figure(ch["capture"], "Revenue by DefiLlama label divided by gross fees, week by week. Front-end transfers are spread back over the days they were earned.",
                sources(f, ["near_intents_revenue_by_label", "near_intents_fees"])),
         "</section>",
 
-        f'<section><h2>Users paid {e(v["fee_before"])} cents per $100 before and {e(v["fee_after"])} after</h2>',
+        f'<section class="half"><h2>Users paid {e(v["fee_before"])} cents per $100 before and {e(v["fee_after"])} after</h2>',
         f'<p class="lede">If partners had passed the cost on, this line would step up at the switch. {e(v["pass_through_sentence"])} In the latest {e(v["latest_weeks"])} weeks it is {e(v["fee_latest"])} cents.</p>',
         figure(ch["fee"], "Gross fees divided by swap volume, by week. The thick lines are the same ratio over each whole window.",
                sources(f, ["near_intents_fees", "near_intents_volume"])),
         "</section>",
 
-        f'<section><h2>NEAR Intents volume {e(v["volume_moved_after"])}; its peers {e(v["peers_moved_after"])}</h2>',
+        f'<section class="half"><h2>NEAR Intents volume {e(v["volume_moved_after"])}; its peers {e(v["peers_moved_after"])}</h2>',
         f'<p class="lede">The blue line is a weighted mix of peers ({e(v["weights"])}) chosen to follow NEAR Intents before the switch. '
         f'After the switch NEAR Intents ran {e(v["estimate"])} against it on average: {e(v["gap_first"])} in the first {e(v["gap_first_weeks"])} weeks and {e(v["gap_second"])} in the last {e(v["gap_second_weeks"])}. '
         f'The window ends where it does because {e(v["first_outage_phrase"])}.</p>',
@@ -270,13 +271,13 @@ def render(f: dict) -> str:
                sources(f, ["near_intents_volume"] + peer_keys)),
         "</section>",
 
-        f'<section><h2>Run on each peer, the same test finds an effect in {e(v["placebo_excluding_zero"])} of {e(v["placebo_units"])}</h2>',
+        f'<section class="half"><h2>Run on each peer, the same test finds an effect in {e(v["placebo_excluding_zero"])} of {e(v["placebo_units"])}</h2>',
         f'<p class="lede">None of the peers had a fee switch on that date, so a sound test should find nothing. NEAR Intents\' fit before the switch {e(v["fit_rank_phrase"])}.</p>',
         figure(ch["placebo"], "Each peer in turn is treated as if it had the switch, with the remaining peers as its comparison.",
                sources(f, peer_keys)),
         "</section>",
 
-        f'<section><h2>{e(v["curve_clean"])} ways of running the test: median {e(v["curve_median"])}, lowest {e(v["curve_min"])}</h2>',
+        f'<section class="half"><h2>{e(v["curve_clean"])} ways of running the test: median {e(v["curve_median"])}, lowest {e(v["curve_min"])}</h2>',
         f'<p class="lede">Every combination of {1 + len(cfg["alt_event_dates"])} event dates, {len(cfg["spec_curve"]["pre_weeks"])} lengths of the period before, {len(cfg["spec_curve"]["post_weeks"])} after, the peer sets and 3 estimators. '
         f'{e(v["curve_within"])} of the results are inside the band and {e(v["curve_below"])} show a loss of more than {e(v["strict_band"])}. '
         f'A further {e(v["curve_not_clean"])} runs overlap a peer outage; they are left out of this chart and of the rules.</p>',
@@ -284,32 +285,32 @@ def render(f: dict) -> str:
                sources(f, ["near_intents_volume"] + peer_keys)),
         "</section>",
 
-        f'<section><h2>Since then revenue is {e(v["revenue_ratio_latest"])}x, and {e(v["growth_from_capture"])} of that growth is the higher cut</h2>',
+        f'<section class="half"><h2>Since then revenue is {e(v["revenue_ratio_latest"])}x, and {e(v["growth_from_capture"])} of that growth is the higher cut</h2>',
         f'<p class="lede">Revenue is volume times the fee rate times the share NEAR keeps, so its growth splits exactly into those three. Latest {e(v["latest_weeks"])} weeks against the {e(v["before_weeks"])} before the switch.</p>',
         figure(ch["growth"], "Ratios of window totals. Shares of growth are shares of the log change.",
                sources(f, near_keys)),
         "</section>",
 
-        f'<section><h2>Share of the peer basket: {e(v["share_before"])} before, {e(v["share_after"])} after, {e(v["share_latest"])} now</h2>',
+        f'<section class="half"><h2>Share of the peer basket: {e(v["share_before"])} before, {e(v["share_after"])} after, {e(v["share_latest"])} now</h2>',
         f'<p class="lede">NEAR Intents volume divided by its own plus the {e(v["basket_count"])} peers\'. Week to week it swings with the largest peer; over whole windows it has barely moved. '
         f'Leaving any one peer out, the change to the latest window is between {e(v["share_change_latest_min"])} and {e(v["share_change_latest_max"])} points.</p>',
         figure(ch["share"], "Plain sums of daily volume. A day on which a peer reports nothing counts as zero for that peer.",
                sources(f, ["near_intents_volume"] + peer_keys)),
         "</section>",
 
+        '<section class="half"><h2>What counts against the thesis</h2><ol class="against">' + "".join(f"<li>{minus(item)}</li>" for item in against) + "</ol></section>",
+
         *live_block,
         *partner_block,
 
-        '<section><h2>What counts against the thesis</h2><ol class="against">' + "".join(f"<li>{minus(item)}</li>" for item in against) + "</ol></section>",
-
-        "<section><h2>What would change the verdict</h2>",
+        "<section class=\"half\"><h2>What would change the verdict</h2>",
         f'<p>The verdict is computed by fixed rules. It turns to "not supported" if the take fails to rise under any window choice, if the interval reaches the break-even loss, '
         f'if the estimate is below −{e(v["strict_band"])} and more than {e(v["kill_share"])} of the clean runs are too, or if, in the latest {e(v["latest_weeks"])} weeks, NEAR keeps less than {e(v["share_floor"])} of fees '
         f'or its share of the basket is more than {e(v["share_drop_limit"])} points below the level before the switch.</p>',
         f'<p>The last rule will be read again on the first snapshot with data through the day before {e(report.long_date(v["forward_date"]))}. Status today: {e(v["forward_status"])}.</p>',
         "</section>",
 
-        "<section><h2>Who the peers are, and who was left out</h2>",
+        "<section class=\"half\"><h2>Who the peers are, and who was left out</h2>",
         f'<p class="lede">Bridge aggregators are taken from DefiLlama\'s list of {e(v["universe_entries"])} by rule: at least {e(v["size_rule"])} of volume in the past year, not flagged as double-counted, '
         f'and weekly volume in each of the {e(v["history_rule_weeks"])} weeks before the switch. Adding the excluded ones back moves the main estimate to {e(v["with_candidates"])}.</p>',
         md_table_to_html(v["table_peers"]),
