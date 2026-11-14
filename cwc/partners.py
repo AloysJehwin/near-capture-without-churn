@@ -182,6 +182,58 @@ def jackknife_log_ratio(before: dict, after: dict, names: set) -> float:
     return math.sqrt(var) if full == full else float("nan")
 
 
+def fee_groups(before: dict, after: dict, latest: dict, partner_names: set, spec: dict) -> dict:
+    """Partners that charged an app fee before the switch against partners that did not.
+
+    Only a partner that charges an app fee has a fee for NEAR to take a share
+    of. Both groups live through the same market and the same changes at NEAR,
+    so the gap between them is a comparison inside NEAR Intents. It is reported
+    with and without the largest fee-charging partner, and for other cut-offs.
+    """
+    usd = lambda t, names: math.fsum(v[1] for r, v in t["referrals"].items() if r in names)
+    fee_bps = {r: (before["referrals"][r][3] / before["referrals"][r][1] if before["referrals"][r][1] > 0 else 0.0) for r in partner_names}
+    total = usd(before, partner_names)
+
+    def ratio(window: dict, names: set):
+        base = usd(before, names) / before["seconds"] if before["seconds"] else 0.0
+        return (usd(window, names) / window["seconds"]) / base if base > 0 and window["seconds"] else float("nan")
+
+    def side(names: set) -> dict:
+        return {"partners": len(names), "share_of_partner_volume_before": usd(before, names) / total if total else 0.0,
+                "after_over_before": ratio(after, names), "latest_over_before": ratio(latest, names),
+                "after_se_log": jackknife_log_ratio(before, after, names) if names else float("nan"),
+                "latest_se_log": jackknife_log_ratio(before, latest, names) if names else float("nan")}
+
+    def compare(charging: set, free: set) -> dict:
+        c, f = side(charging), side(free)
+        gap = lambda key: c[key] / f[key] if f[key] == f[key] and f[key] > 0 and c[key] == c[key] else float("nan")
+        return {"charging": c, "not_charging": f, "after_gap": gap("after_over_before"), "latest_gap": gap("latest_over_before"),
+                "after_gap_se_log": math.sqrt(c["after_se_log"] ** 2 + f["after_se_log"] ** 2),
+                "latest_gap_se_log": math.sqrt(c["latest_se_log"] ** 2 + f["latest_se_log"] ** 2)}
+
+    def split(threshold: float, leave_out=()):
+        charging = {r for r in partner_names if fee_bps[r] >= threshold and r not in leave_out}
+        free = {r for r in partner_names if fee_bps[r] < threshold}
+        return charging, free
+
+    main = spec["fee_charging_min_bps"]
+    charging, free = split(main)
+    largest = max(sorted(charging), key=lambda r: before["referrals"][r][1]) if charging else None
+    out = compare(charging, free)
+    out["min_fee_bps"] = main
+    out["largest_charging_partner"] = largest
+    out["largest_share_of_partner_volume_before"] = before["referrals"][largest][1] / total if largest and total else 0.0
+    out["without_largest"] = compare(*split(main, (largest,))) if largest else None
+    out["other_cut_offs"] = []
+    for threshold in spec["fee_cut_offs_checked"]:
+        all_in = compare(*split(threshold))
+        fewer = compare(*split(threshold, (largest,)))
+        out["other_cut_offs"].append({"min_fee_bps": threshold, "charging_partners": all_in["charging"]["partners"],
+                                      "after_gap": all_in["after_gap"], "latest_gap": all_in["latest_gap"],
+                                      "after_gap_without_largest": fewer["after_gap"], "latest_gap_without_largest": fewer["latest_gap"]})
+    return out
+
+
 def analyse(sample: dict, cfg: dict, windows: dict, defillama_volume_per_day: dict) -> dict:
     """`windows` maps 'before', 'after', 'latest' to (start, end) dates; `defillama_volume_per_day` to DefiLlama's figure."""
     spec = cfg["partners"]
@@ -317,6 +369,7 @@ def analyse(sample: dict, cfg: dict, windows: dict, defillama_volume_per_day: di
         "top_gone_latest": gone_latest,
         "top_halved_after": halved_after,
         "gone_below": gone_below,
+        "fee_groups": fee_groups(before, after, latest, partners_before, spec),
         "new_partner_share_of_partner_volume_latest": new_latest_usd / latest_partner_usd if latest_partner_usd else 0.0,
     })
 

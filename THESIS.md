@@ -127,9 +127,20 @@ Volume per day is the dollars in a window's blocks divided by the time those blo
 
 ![The largest partner apps before the fee switch, in three windows](docs/charts/partners.svg)
 
+**Did the partners with a fee to share do worse?**
+
+Only a partner that charges an app fee has a fee for NEAR to share. Partners that charge none are a comparison group inside NEAR Intents: same market, same weeks, no fee to lose. After the switch the fee-charging group sent 0.94x its earlier volume per day and the others 0.93x, a gap of 1.01x (sampling error about 14% either way). One app, swapkit, is 53% of all partner volume. Without it the fee-charging group sent 0.48x, a gap of 0.52x to the others (sampling error about 19% either way); in the latest window 0.94x against 1.39x. With other cut-offs for "charges a fee" the gap after the switch is: at 1 cent, 0.92x with swapkit and 0.67x without; at 5 cents, 1.01x with swapkit and 0.52x without; at 20 cents, 1.07x with swapkit and 0.56x without.
+
+| Partner apps, by what they charged before the switch | Apps | Share of partner volume before | After against before | Latest against before |
+| --- | --- | --- | --- | --- |
+| Charged an app fee of 5 cents per $100 or more | 49 | 71% | 0.94x | 1.26x |
+| The same without the largest one (swapkit) | 48 | 18% | 0.48x | 0.94x |
+| Charged less, or nothing | 60 | 29% | 0.93x | 1.39x |
+
 **What it shows for the thesis**
 
 * The 10 largest partners together sent 0.94x their earlier volume per day after the switch and 1.29x in the latest window. NEAR Intents as a whole, in DefiLlama's data, was 0.82x and 1.67x; the peers together were 0.83x and 1.73x.
+* Taken together, partners that charged an app fee did no worse after the switch than partners that charged none: 0.94x against 0.93x.
 * All 10 still appear in the sample in the latest window.
 * Partner apps sent 78% of the sampled volume before the switch, 75% after and 76% in the latest window.
 * Partner apps that do not appear in the sample before the switch sent 10% of partner volume in the latest window.
@@ -137,6 +148,7 @@ Volume per day is the dollars in a window's blocks divided by the time those blo
 
 **What it shows against**
 
+* **Apart from swapkit, the partners with a fee to share fell behind.** Fee-charging partners other than swapkit sent 0.48x their earlier volume after the switch, while partners with no fee to share sent 0.93x: a gap of 0.52x, with a sampling error of about 19% either way. In the latest window it is 0.94x against 1.39x. This is what leaving because of the fee switch would look like. The result for the whole group rests on swapkit staying.
 * **Some partners did leave.** Of the 10 largest before the switch, 4 sent less than half their earlier volume after it (zashi / zodl, infinex.near, rhea and solswap.intents-referral.near), and 2 of those less than 10% (infinex.near and rhea). In the latest window 1 is below 10% (infinex.near). The sample cannot say why a partner sent less.
 * **The largest partners sent less after the switch.** 0.94x their earlier volume per day, with a sampling error of about 8% either way. NEAR Intents as a whole was 0.82x over the same weeks, so the partners did no worse than the total, but the total fell.
 * **The sample is not the whole of NEAR Intents.** It holds swaps made through the 1Click service, about 30% of DefiLlama's volume before the switch, 36% after and 27% latest. It is taken at fixed hours (00:00, 08:00 and 16:00 UTC), not all day. The partner name is the one the app declares.
@@ -161,7 +173,7 @@ The verdict is computed by fixed rules in `cwc/verdict.py`. It becomes NOT SUPPO
 
 **Dated check.** Rule 4 will be read again on the first snapshot whose data run through the day before 2027-02-15. Status today: not yet due.
 
-Partner-level evidence is in section 5. It is not part of the rules, because it is a sample that others cannot retake without a key. If the largest partners from before the switch had stopped sending swaps while new ones filled the gap, "without churn" would be the wrong name for what happened. In the sample the 10 largest together sent 0.94x their earlier volume after the switch and 1.29x latest, and 2 of them fell below 10%.
+Partner-level evidence is in section 5. It is not part of the rules, because it is a sample that others cannot retake without a key. If the largest partners from before the switch had stopped sending swaps while new ones filled the gap, "without churn" would be the wrong name for what happened. In the sample the 10 largest together sent 0.94x their earlier volume after the switch and 1.29x latest, and 2 of them fell below 10%. Fee-charging partners other than swapkit sent 0.48x against 0.93x for partners with no fee to share, which is churn among the smaller partners that the totals hide.
 
 ## 8. Method
 
@@ -198,7 +210,7 @@ python3 -m cwc rebuild     # rewrites out/findings.json, THESIS.md, the README b
 python3 -m unittest discover -s tests
 ```
 
-Python 3.10 or later. No packages to install, no network, no key. Snapshot fingerprint 1517238020c83d4c, configuration fingerprint a42b53c71e4562e8.
+Python 3.10 or later. No packages to install, no network, no key. Snapshot fingerprint 1517238020c83d4c, configuration fingerprint 3542d89e2996850d.
 
 ## 10. Not computed
 

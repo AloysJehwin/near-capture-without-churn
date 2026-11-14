@@ -321,6 +321,33 @@ def partner_facts(f: dict) -> dict:
         f"**Most app fees in the sample are still addressed to the partner.** Of the app fees declared in the sampled swaps, {share(b['fee_share_to_near_partner_share_wallets'], 1)} named NEAR's fee-share wallets as the receiver before the switch, "
         f"{share(a['fee_share_to_near_partner_share_wallets'], 1)} after and {share(l['fee_share_to_near_partner_share_wallets'], 1)} latest. NEAR's documentation gives 50/50 as the default split. "
         "The field shows where a swap's app fee is addressed. It does not show what NEAR collects in other ways, so it is not a measure of the split.")
+    g = p["fee_groups"]
+    gw = g["without_largest"]
+    big = (spec_names := f["config"]["partners"].get("display_names", {})).get(g["largest_charging_partner"], g["largest_charging_partner"])
+    cut = n(g["min_fee_bps"], 0)
+    err = lambda se: "n/a" if se is None else f"about {pct(100 * (2.718281828459045 ** se - 1), 0)} either way"
+    group_row = lambda label, d: [label, str(d["partners"]), share(d["share_of_partner_volume_before"], 0), ratio(d["after_over_before"]), ratio(d["latest_over_before"])]
+    fee_rows = [group_row(f"Charged an app fee of {cut} cents per $100 or more", g["charging"])]
+    if gw:
+        fee_rows.append(group_row(f"The same without the largest one ({big})", gw["charging"]))
+    fee_rows.append(group_row("Charged less, or nothing", g["not_charging"]))
+    fee_table = table(["Partner apps, by what they charged before the switch", "Apps", "Share of partner volume before", "After against before", "Latest against before"], fee_rows)
+    cut_offs = "; ".join(f"at {n(c['min_fee_bps'], 0)} cent{'' if c['min_fee_bps'] == 1 else 's'}, {ratio(c['after_gap'])} with {big} and {ratio(c['after_gap_without_largest'])} without" for c in g["other_cut_offs"])
+    fee_text = (
+        "Only a partner that charges an app fee has a fee for NEAR to share. Partners that charge none are a comparison group inside NEAR Intents: same market, same weeks, no fee to lose. "
+        f"After the switch the fee-charging group sent {ratio(g['charging']['after_over_before'])} its earlier volume per day and the others {ratio(g['not_charging']['after_over_before'])}, "
+        f"a gap of {ratio(g['after_gap'])} (sampling error {err(g['after_gap_se_log'])}). "
+        + (f"One app, {big}, is {share(g['largest_share_of_partner_volume_before'], 0)} of all partner volume. Without it the fee-charging group sent {ratio(gw['charging']['after_over_before'])}, "
+           f"a gap of {ratio(gw['after_gap'])} to the others (sampling error {err(gw['after_gap_se_log'])}); in the latest window {ratio(gw['charging']['latest_over_before'])} against {ratio(g['not_charging']['latest_over_before'])}. " if gw else "")
+        + f"With other cut-offs for \"charges a fee\" the gap after the switch is: {cut_offs}.")
+    if g["after_gap"] is not None and g["after_gap"] >= 0.9:
+        for_items.insert(1, f"Taken together, partners that charged an app fee did no worse after the switch than partners that charged none: {ratio(g['charging']['after_over_before'])} against {ratio(g['not_charging']['after_over_before'])}.")
+    if gw and gw["after_gap"] is not None and gw["after_gap"] < 0.8:
+        against_items.insert(0,
+            f"**Apart from {big}, the partners with a fee to share fell behind.** Fee-charging partners other than {big} sent {ratio(gw['charging']['after_over_before'])} their earlier volume after the switch, "
+            f"while partners with no fee to share sent {ratio(g['not_charging']['after_over_before'])}: a gap of {ratio(gw['after_gap'])}, with a sampling error of {err(gw['after_gap_se_log'])}. "
+            f"In the latest window it is {ratio(gw['charging']['latest_over_before'])} against {ratio(g['not_charging']['latest_over_before'])}. "
+            f"This is what leaving because of the fee switch would look like. The result for the whole group rests on {big} staying.")
     body = "\n\n".join([
         f"DefiLlama gives totals. NEAR's Explorer API lists single swaps and names the partner app that sent each one. It needs a partner key, so this repository stores a sample taken with one: "
         f"{p['swaps']:,} successful swaps in {p['blocks']} blocks, each block up to 1,000 swaps in a row ending at a fixed hour ({hours} UTC) on each day from {p['first_day']} to {p['last_day']}. "
@@ -328,6 +355,9 @@ def partner_facts(f: dict) -> dict:
         partner_table,
         "Volume per day is the dollars in a window's blocks divided by the time those blocks span.",
         "![The largest partner apps before the fee switch, in three windows](docs/charts/partners.svg)",
+        "**Did the partners with a fee to share do worse?**",
+        fee_text,
+        fee_table,
         "**What it shows for the thesis**",
         "\n".join("* " + item for item in for_items),
         "**What it shows against**",
@@ -340,7 +370,9 @@ def partner_facts(f: dict) -> dict:
         "partner_verdict_note": (
             "Partner-level evidence is in section 5. It is not part of the rules, because it is a sample that others cannot retake without a key. "
             f"If the largest partners from before the switch had stopped sending swaps while new ones filled the gap, \"without churn\" would be the wrong name for what happened. "
-            f"In the sample the {top} largest together sent {ratio(p['top_after_over_before'])} their earlier volume after the switch and {ratio(p['top_latest_over_before'])} latest, and {len(gone)} of them fell below {gone_limit}."),
+            f"In the sample the {top} largest together sent {ratio(p['top_after_over_before'])} their earlier volume after the switch and {ratio(p['top_latest_over_before'])} latest, and {len(gone)} of them fell below {gone_limit}. "
+            + (f"Fee-charging partners other than {big} sent {ratio(gw['charging']['after_over_before'])} against {ratio(g['not_charging']['after_over_before'])} for partners with no fee to share, "
+               "which is churn among the smaller partners that the totals hide." if gw and gw["after_gap"] is not None and gw["after_gap"] < 0.8 else "")),
         "partner_method_bullet": (
             f"**Partner sample.** `scripts/explorer_sample.py` asks NEAR's Explorer API for up to 1,000 successful swaps that end at each of the hours {hours} UTC on every day, and keeps totals per partner app and per fee account. "
             "The files are in `data/explorer/` with their SHA-256 in `data/explorer/MANIFEST.json`, and the rebuild stops if one does not match. Taking a new sample needs a partner key; rebuilding from the stored one does not. "
@@ -352,6 +384,8 @@ def partner_facts(f: dict) -> dict:
         "partner_readme_rows": [
             f"| The {top} largest partner apps before the switch: volume per day after, and latest (sample of NEAR's swap records) | {ratio(p['top_after_over_before'])}, {ratio(p['top_latest_over_before'])} |",
             f"| Of those {top}, below {gone_limit} of their earlier volume after the switch | {len(gone)} ({listed(gone)}) |",
+            f"| Fee-charging partners against partners with no fee, volume after the switch | {ratio(g['charging']['after_over_before'])} against {ratio(g['not_charging']['after_over_before'])} |",
+            *([f"| The same without the largest partner ({big}) | {ratio(gw['charging']['after_over_before'])} against {ratio(g['not_charging']['after_over_before'])} |"] if gw else []),
         ],
         "partner_top_after": ratio(p["top_after_over_before"]), "partner_top_latest": ratio(p["top_latest_over_before"]),
         "partner_top_count": str(top), "partner_gone_count": str(len(gone)), "partner_gone_names": listed(gone),

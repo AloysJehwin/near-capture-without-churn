@@ -20,6 +20,8 @@
 | Clean specifications run | 693 (median +2.3%, range -17.3% to +34.1%) |
 | The 10 largest partner apps before the switch: volume per day after, and latest (sample of NEAR's swap records) | 0.94x, 1.29x |
 | Of those 10, below 10% of their earlier volume after the switch | 2 (infinex.near and rhea) |
+| Fee-charging partners against partners with no fee, volume after the switch | 0.94x against 0.93x |
+| The same without the largest partner (swapkit) | 0.48x against 0.93x |
 
 ![Volume change against peers with the break-even loss](docs/charts/ruler.svg)
 

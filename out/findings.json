@@ -103,6 +103,12 @@
    "display_names": {
     "zashi": "zashi / zodl"
    },
+   "fee_charging_min_bps": 5.0,
+   "fee_cut_offs_checked": [
+    1.0,
+    5.0,
+    20.0
+   ],
    "gone_below": 0.1,
    "near_wallets": {
     "front_end": [
@@ -575,7 +581,7 @@
   "alt_event_dates": [
    "2026-02-02"
   ],
-  "analysis_config_sha256": "a42b53c71e4562e85107c90ad65afa0a1aebe4b4a819f432ac643283671a9f29",
+  "analysis_config_sha256": "3542d89e2996850d03ff198238d1e54691495b565d120233f1c6cb29e556d380",
   "data_through": "2026-11-12",
   "event_date": "2026-02-23",
   "last_complete_week_end": "2026-11-08",
@@ -590,6 +596,79 @@
   "available": true,
   "blocks": 1050,
   "blocks_with_fee_accounts_per_partner": 0,
+  "fee_groups": {
+   "after_gap": 1.006255,
+   "after_gap_se_log": 0.132637,
+   "charging": {
+    "after_over_before": 0.935739,
+    "after_se_log": 0.082331,
+    "latest_over_before": 1.257925,
+    "latest_se_log": 0.074605,
+    "partners": 49,
+    "share_of_partner_volume_before": 0.707509
+   },
+   "largest_charging_partner": "swapkit",
+   "largest_share_of_partner_volume_before": 0.527267,
+   "latest_gap": 0.90283,
+   "latest_gap_se_log": 0.129761,
+   "min_fee_bps": 5.0,
+   "not_charging": {
+    "after_over_before": 0.929922,
+    "after_se_log": 0.103992,
+    "latest_over_before": 1.393314,
+    "latest_se_log": 0.10617,
+    "partners": 60,
+    "share_of_partner_volume_before": 0.292491
+   },
+   "other_cut_offs": [
+    {
+     "after_gap": 0.915636,
+     "after_gap_without_largest": 0.665039,
+     "charging_partners": 56,
+     "latest_gap": 0.626467,
+     "latest_gap_without_largest": 0.503058,
+     "min_fee_bps": 1.0
+    },
+    {
+     "after_gap": 1.006255,
+     "after_gap_without_largest": 0.518208,
+     "charging_partners": 49,
+     "latest_gap": 0.90283,
+     "latest_gap_without_largest": 0.675723,
+     "min_fee_bps": 5.0
+    },
+    {
+     "after_gap": 1.066303,
+     "after_gap_without_largest": 0.555535,
+     "charging_partners": 34,
+     "latest_gap": 0.921966,
+     "latest_gap_without_largest": 0.67642,
+     "min_fee_bps": 20.0
+    }
+   ],
+   "without_largest": {
+    "after_gap": 0.518208,
+    "after_gap_se_log": 0.177586,
+    "charging": {
+     "after_over_before": 0.481893,
+     "after_se_log": 0.143954,
+     "latest_over_before": 0.941495,
+     "latest_se_log": 0.129892,
+     "partners": 48,
+     "share_of_partner_volume_before": 0.180241
+    },
+    "latest_gap": 0.675723,
+    "latest_gap_se_log": 0.167762,
+    "not_charging": {
+     "after_over_before": 0.929922,
+     "after_se_log": 0.103992,
+     "latest_over_before": 1.393314,
+     "latest_se_log": 0.10617,
+     "partners": 60,
+     "share_of_partner_volume_before": 0.292491
+    }
+   }
+  },
   "files": [
    {
     "blocks": 1050,

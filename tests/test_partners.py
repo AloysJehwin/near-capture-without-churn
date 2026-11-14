@@ -15,6 +15,8 @@ SPEC = {
     "no_referral": "(none)",
     "top": 2,
     "gone_below": 0.1,
+    "fee_charging_min_bps": 5.0,
+    "fee_cut_offs_checked": [1.0, 5.0],
     "same_partner": {"old-name": "alpha"},
     "display_names": {"alpha": "Alpha"},
 }
@@ -109,6 +111,17 @@ class Analyse(unittest.TestCase):
         self.assertAlmostEqual(out["top_partners"][0]["before"]["near_share_of_its_fees"], 0.1)
         self.assertAlmostEqual(out["windows"]["before"]["fee_share_to_near_partner_share_wallets"], 10.0 / 130.0)
         self.assertAlmostEqual(out["windows"]["before"]["fee_share_to_near_front_end_wallet"], 30.0 / 130.0)
+
+    def test_fee_charging_partners_are_compared_with_the_rest(self):
+        g = self.out["fee_groups"]
+        # alpha charged 50 cents per $100 before the switch; beta and gamma charged nothing
+        self.assertEqual(g["largest_charging_partner"], "alpha")
+        self.assertEqual(g["charging"]["partners"], 1)
+        self.assertEqual(g["not_charging"]["partners"], 2)
+        self.assertAlmostEqual(g["charging"]["after_over_before"], 0.5)
+        self.assertAlmostEqual(g["not_charging"]["after_over_before"], 10.0 / 60.0)
+        self.assertAlmostEqual(g["after_gap"], 3.0)
+        self.assertIsNone(g["without_largest"]["after_gap"])
 
     def test_every_number_is_finite_or_none(self):
         text = json.dumps(self.out, allow_nan=False)
